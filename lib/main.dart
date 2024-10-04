@@ -1,4 +1,3 @@
-import 'package:evergrow_mobile_app/screens/menu/home.dart';
 import 'package:evergrow_mobile_app/screens/menu/select_location.dart';
 import 'package:evergrow_mobile_app/screens/menu/start_menu.dart';
 import 'package:flutter/material.dart';

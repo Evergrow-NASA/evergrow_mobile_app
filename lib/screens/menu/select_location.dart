@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:evergrow_mobile_app/screens/menu/home.dart';
 import 'package:flutter/material.dart';
+import 'package:evergrow_mobile_app/constants.dart';
+import 'package:evergrow_mobile_app/screens/menu/home.dart';
 import 'package:geocoder2/geocoder2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
@@ -91,7 +92,7 @@ class _SelectLocationState extends State<SelectLocation> {
                           controller: _searchController,
                           decoration: InputDecoration(
                             filled: true,
-                            fillColor: const Color(0xFFDAE5DD),
+                            fillColor: secondary3,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(10),
                               borderSide: BorderSide.none,
@@ -105,7 +106,7 @@ class _SelectLocationState extends State<SelectLocation> {
                         width: double.infinity,
                         child: Container(
                           decoration: BoxDecoration(
-                            color: const Color(0xFF0C0C20),
+                            color: neutral,
                             borderRadius: BorderRadius.circular(20),
                             boxShadow: [
                               BoxShadow(
@@ -170,14 +171,14 @@ class _SelectLocationState extends State<SelectLocation> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: Colors.black,
+                    color: neutral,
                     width: 2.0,
                   ),
                 ),
                 child: const Center(
                   child: Icon(
                     Icons.close,
-                    color: Colors.black,
+                    color: neutral,
                     size: 35,
                   ),
                 ),
@@ -194,7 +195,7 @@ class _SelectLocationState extends State<SelectLocation> {
       GeoData data = await Geocoder2.getDataFromCoordinates(
           latitude: destLocation!.latitude,
           longitude: destLocation!.longitude,
-          googleMapApiKey: "AIzaSyCTdJnxuRGpxosR2KBY_XKvmKQM7tXT9g0");
+          googleMapApiKey: apiKey);
       setState(() {
         _address = data.address;
       });
