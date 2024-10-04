@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:evergrow_mobile_app/screens/menu/home.dart';
 import 'package:flutter/material.dart';
-import 'package:evergrow_mobile_app/screens/menu/navigation_map.dart';
 import 'package:geocoder2/geocoder2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
