@@ -1,12 +1,17 @@
 import 'dart:async';
 
+import 'package:evergrow_mobile_app/models/autocomplete_prediction.dart';
+import 'package:evergrow_mobile_app/services/map_service.dart';
+import 'package:evergrow_mobile_app/widgets/location_list_tile.dart';
 import 'package:flutter/material.dart';
 import 'package:evergrow_mobile_app/constants.dart';
 import 'package:evergrow_mobile_app/screens/menu/home.dart';
 import 'package:geocoder2/geocoder2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+import 'dart:convert';
 import 'package:location/location.dart' as loc;
+import 'package:http/http.dart' as http;
 
 class SelectLocation extends StatefulWidget {
   const SelectLocation({super.key});
@@ -16,9 +21,10 @@ class SelectLocation extends StatefulWidget {
 }
 
 class _SelectLocationState extends State<SelectLocation> {
+  List<AutocompletePrediction> predictions = [];
   final TextEditingController _searchController = TextEditingController();
-  LatLng? destLocation = const LatLng(40.7128, -74.0060);
 
+  LatLng? destLocation = const LatLng(40.7128, -74.0060);
   Location location = Location();
   loc.LocationData? _currentPosition;
   final Completer<GoogleMapController?> _controller = Completer();
@@ -28,7 +34,58 @@ class _SelectLocationState extends State<SelectLocation> {
   void initState() {
     super.initState();
     getCurrentLocation();
-    print("Current Location: $_currentPosition");
+
+    _searchController.addListener(() {
+      placeAutoComplete(_searchController.text);
+    });
+  }
+
+  void placeAutoComplete(String text) async {
+    Uri uri =
+        Uri.https("maps.googleapis.com", "maps/api/place/autocomplete/json", {
+      "input": text,
+      "key": apiKey,
+    });
+
+    String? response = await MapService.fetchUrl(uri);
+
+    if (response != null) {
+      var result = json.decode(response);
+      if (result['predictions'] != null) {
+        setState(() {
+          predictions = (result['predictions'] as List)
+              .map((e) => AutocompletePrediction.fromJson(e))
+              .toList();
+        });
+      }
+    }
+  }
+
+  Future<void> _selectLocation(String placeId) async {
+    Uri uri = Uri.https("maps.googleapis.com", "maps/api/place/details/json", {
+      "place_id": placeId,
+      "key": apiKey,
+    });
+
+    var response = await http.get(uri);
+    if (response.statusCode == 200) {
+      var result = json.decode(response.body);
+
+      var location = result['result']['geometry']['location'];
+      LatLng newLocation = LatLng(location['lat'], location['lng']);
+
+      setState(() {
+        _searchController.text = result['result']['formatted_address'];
+        predictions.clear();
+      });
+
+      final GoogleMapController? controller = await _controller.future;
+      controller?.animateCamera(CameraUpdate.newLatLng(newLocation));
+
+      setState(() {
+        destLocation = newLocation;
+      });
+    }
   }
 
   @override
@@ -37,6 +94,7 @@ class _SelectLocationState extends State<SelectLocation> {
       body: Stack(
         children: [
           Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Expanded(
                 child: GoogleMap(
@@ -67,6 +125,8 @@ class _SelectLocationState extends State<SelectLocation> {
                 ),
               ),
               Container(
+                  height: 300.0,
+                  padding: const EdgeInsets.all(16.0),
                   decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.only(
@@ -74,7 +134,6 @@ class _SelectLocationState extends State<SelectLocation> {
                       topRight: Radius.circular(20),
                     ),
                   ),
-                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -88,7 +147,10 @@ class _SelectLocationState extends State<SelectLocation> {
                       const SizedBox(height: 20),
                       SizedBox(
                         width: double.infinity,
-                        child: TextField(
+                        child: TextFormField(
+                          onChanged: (value) {
+                            placeAutoComplete(value);
+                          },
                           controller: _searchController,
                           decoration: InputDecoration(
                             filled: true,
@@ -98,6 +160,19 @@ class _SelectLocationState extends State<SelectLocation> {
                               borderSide: BorderSide.none,
                             ),
                             suffixIcon: const Icon(Icons.search),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      Expanded(
+                        child: ListView.builder(
+                          padding: EdgeInsets.zero,
+                          itemCount: predictions.length,
+                          itemBuilder: (context, index) => LocationListTile(
+                            press: () {
+                              _selectLocation(predictions[index].placeId!);
+                            },
+                            location: predictions[index].description!,
                           ),
                         ),
                       ),
@@ -120,12 +195,13 @@ class _SelectLocationState extends State<SelectLocation> {
                           child: ElevatedButton(
                             onPressed: () {
                               Navigator.of(context).pushAndRemoveUntil(
-                                  MaterialPageRoute(
-                                    builder: (context) => Home(
-                                        destLocation!.latitude,
-                                        destLocation!.longitude),
-                                  ),
-                                  (route) => false);
+                                MaterialPageRoute(
+                                  builder: (context) => Home(
+                                      destLocation!.latitude,
+                                      destLocation!.longitude),
+                                ),
+                                (route) => false,
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
@@ -148,9 +224,9 @@ class _SelectLocationState extends State<SelectLocation> {
             ],
           ),
           Align(
-            alignment: Alignment.center,
+            alignment: Alignment.topCenter,
             child: Padding(
-              padding: const EdgeInsets.only(bottom: 35.0),
+              padding: const EdgeInsets.only(top: 350.0),
               child: Image.asset(
                 'assets/icons/pick.png',
                 height: 45,
@@ -166,8 +242,8 @@ class _SelectLocationState extends State<SelectLocation> {
                 Navigator.pushNamed(context, '/');
               },
               child: Container(
-                height: 45,
-                width: 45,
+                height: 40,
+                width: 40,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
@@ -179,7 +255,7 @@ class _SelectLocationState extends State<SelectLocation> {
                   child: Icon(
                     Icons.close,
                     color: neutral,
-                    size: 35,
+                    size: 30,
                   ),
                 ),
               ),
