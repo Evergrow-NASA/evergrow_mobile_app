@@ -4,11 +4,11 @@ import 'package:evergrow_mobile_app/screens/menu/start_menu.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MainApp());
+  runApp(const MyApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class MainApp extends StatelessWidget {
         splashColor: Colors.transparent,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/location',
       onGenerateRoute: (RouteSettings settings) {
         WidgetBuilder builder;
         switch (settings.name) {
@@ -29,8 +29,6 @@ class MainApp extends StatelessWidget {
           case '/location':
             builder = (BuildContext context) => const SelectLocation();
             break;
-          case '/home':
-            builder = (BuildContext context) => const Home();
           default:
             throw Exception('Invalid route: ${settings.name}');
         }
