@@ -31,6 +31,7 @@ flutter:
   assets:
     - assets/top_crop.png
     - assets/logo.png
+    - assets/leaf.png
     - assets/moisture_icon.svg
     - assets/icons/pick.png
     - assets/icons/close.png
