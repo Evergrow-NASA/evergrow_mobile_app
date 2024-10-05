@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         splashColor: Colors.transparent,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/location',
+      initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
         WidgetBuilder builder;
         switch (settings.name) {
