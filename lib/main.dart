@@ -1,7 +1,9 @@
 import 'package:evergrow_mobile_app/screens/menu/home.dart';
-import 'package:evergrow_mobile_app/screens/menu/select_location.dart';
-import 'package:evergrow_mobile_app/screens/menu/start_menu.dart';
+import 'package:evergrow_mobile_app/screens/select_location.dart';
+import 'package:evergrow_mobile_app/screens/start_menu.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 void main() {
   runApp(const MainApp());
@@ -15,9 +17,13 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       title: 'Evergrow',
       theme: ThemeData(
-        fontFamily: 'Inter',
+         textTheme: GoogleFonts.openSansTextTheme(
+      Theme.of(context).textTheme,
+    ),
+        fontFamily: 'OpenSans',
         splashColor: Colors.transparent,
       ),
+      
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       onGenerateRoute: (RouteSettings settings) {
@@ -30,7 +36,7 @@ class MainApp extends StatelessWidget {
             builder = (BuildContext context) => const SelectLocation();
             break;
           case '/home':
-            builder = (BuildContext context) => const Home();
+            builder = (BuildContext context) =>const Home();
           default:
             throw Exception('Invalid route: ${settings.name}');
         }
