@@ -10,9 +10,16 @@ dependencies:
   flutter:
     sdk: flutter
   font_awesome_flutter: ^10.7.0
-  flutter_svg: ^2.0.1
-  google_fonts: ^6.2.1
+  google_fonts: 4.0.4
   table_calendar: ^3.1.2
+  flutter_polyline_points: ^1.0.0
+  flutter_svg: ^2.0.9
+  geocoder2: ^1.4.0
+  google_maps_flutter: ^2.9.0
+  http: ^0.13.6
+  location: ^6.0.2
+  url_launcher: ^6.3.0
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
@@ -25,3 +32,5 @@ flutter:
     - assets/top_crop.png
     - assets/logo.png
     - assets/moisture_icon.svg
+    - assets/icons/pick.png
+    - assets/icons/close.png

@@ -17,8 +17,10 @@ const List<Map<String, String>> weatherData = [
 
 class Home extends StatefulWidget {
   final String location;
+ final double lat;
+  final double lng;
 
-  const Home({super.key, this.location = 'Ayacucho, Perú'});
+  const Home(this.lat, this.lng, {super.key,this.location = 'Ayacucho, Perú'});
 
   @override
   State<Home> createState() => _HomeState();
