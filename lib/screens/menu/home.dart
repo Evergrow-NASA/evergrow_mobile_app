@@ -1,4 +1,5 @@
 import 'package:evergrow_mobile_app/models/temperature_data.dart';
+import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
 import 'package:evergrow_mobile_app/services/waether_service.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -46,7 +47,6 @@ class _HomeState extends State<Home> {
       setState(() {
         _isLoading = false;
       });
-      
     }
   }
 
@@ -56,41 +56,28 @@ class _HomeState extends State<Home> {
     });
   }
 
-  
-  String _extractHour(String dateTimeKey) {
-    String hour = dateTimeKey.substring(8);
-    int hourInt = int.parse(hour);
-    String period = hourInt >= 12 ? 'PM' : 'AM';
-    hourInt = hourInt > 12 ? hourInt - 12 : hourInt == 0 ? 12 : hourInt;
-    return '$hourInt:00 $period';
-  }
-
-  IconData _getWeatherIcon(double temperature) {
-    if (temperature >= 30) {
-      return Icons.wb_sunny; 
-    } else if (temperature >= 20) {
-      return Icons.wb_cloudy; 
-    } else {
-      return Icons.ac_unit; 
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: [
-          Container(),
-          _buildHomeContent(),
-          Container(),
-        ],
-      ),
+      body: _getContentWidget(_selectedIndex),
       bottomNavigationBar: BottomNavigation(
         selectedIndex: _selectedIndex,
         onItemTapped: _onItemTapped,
       ),
     );
+  }
+
+  Widget _getContentWidget(int index) {
+    switch (index) {
+      case 0:
+       // return const SoilMoistureScreen();
+      case 1:
+        return _buildHomeContent();
+      case 2:
+        return const Notifications();
+      default:
+        return _buildHomeContent();
+    }
   }
 
   Widget _buildHomeContent() {
@@ -175,6 +162,24 @@ class _HomeState extends State<Home> {
         }).toList(),
       ),
     );
+  }
+
+    String _extractHour(String dateTimeKey) {
+    String hour = dateTimeKey.substring(8);
+    int hourInt = int.parse(hour);
+    String period = hourInt >= 12 ? 'PM' : 'AM';
+    hourInt = hourInt > 12 ? hourInt - 12 : hourInt == 0 ? 12 : hourInt;
+    return '$hourInt:00 $period';
+  }
+
+  IconData _getWeatherIcon(double temperature) {
+    if (temperature >= 30) {
+      return Icons.wb_sunny; 
+    } else if (temperature >= 20) {
+      return Icons.wb_cloudy; 
+    } else {
+      return Icons.ac_unit; 
+    }
   }
 
   Widget _buildWeatherCalendarHeader() {
