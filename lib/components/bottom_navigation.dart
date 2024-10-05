@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import '../utils/theme.dart';
 
 class BottomNavigation extends StatelessWidget {
@@ -32,24 +31,16 @@ class BottomNavigation extends StatelessWidget {
           showUnselectedLabels: false,
           selectedItemColor: Colors.white,
           unselectedItemColor: Colors.white54,
-          items: [
+          items: const [
             BottomNavigationBarItem(
-              icon: SvgPicture.asset(
-                'assets/moisture_icon.svg',
-                width: 20,
-                height: 20,
-                colorFilter: ColorFilter.mode(
-                  selectedIndex == 0 ? Colors.white : Colors.white54,
-                  BlendMode.srcIn,
-                ),
-              ),
+              icon: Icon(Icons.chat, size: 28),
               label: '',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.home, size: 28),
               label: '',
             ),
-            const BottomNavigationBarItem(
+            BottomNavigationBarItem(
               icon: Icon(Icons.notifications, size: 28),
               label: '',
             ),
