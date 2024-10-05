@@ -9,6 +9,13 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_polyline_points: ^1.0.0
+  flutter_svg: ^2.0.9
+  geocoder2: ^1.4.0
+  google_maps_flutter: ^2.9.0
+  http: ^0.13.6
+  location: ^6.0.2
+  url_launcher: ^6.3.0
 
 dev_dependencies:
   flutter_test:
@@ -17,3 +24,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/icons/pick.png
+    - assets/icons/close.png
