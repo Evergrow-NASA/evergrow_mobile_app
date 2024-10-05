@@ -1,5 +1,4 @@
 import 'dart:async';
-
 import 'package:evergrow_mobile_app/models/autocomplete_prediction.dart';
 import 'package:evergrow_mobile_app/services/map_service.dart';
 import 'package:evergrow_mobile_app/widgets/location_list_tile.dart';
@@ -24,7 +23,7 @@ class _SelectLocationState extends State<SelectLocation> {
   List<AutocompletePrediction> predictions = [];
   final TextEditingController _searchController = TextEditingController();
 
-  LatLng? destLocation = const LatLng(40.7128, -74.0060);
+  LatLng? destLocation = const LatLng(40.7128, -74.0060); 
   Location location = Location();
   loc.LocationData? _currentPosition;
   final Completer<GoogleMapController?> _controller = Completer();
@@ -73,10 +72,12 @@ class _SelectLocationState extends State<SelectLocation> {
 
       var location = result['result']['geometry']['location'];
       LatLng newLocation = LatLng(location['lat'], location['lng']);
+      String formattedAddress = result['result']['formatted_address'];
 
       setState(() {
-        _searchController.text = result['result']['formatted_address'];
+        _searchController.text = formattedAddress;
         predictions.clear();
+        _address = formatAddress(formattedAddress); 
       });
 
       final GoogleMapController? controller = await _controller.future;
@@ -88,9 +89,16 @@ class _SelectLocationState extends State<SelectLocation> {
     }
   }
 
+  String formatAddress(String address) {
+    List<String> parts = address.split(',');
+    if (parts.isNotEmpty) {
+      return parts.sublist(1).join(',').trim(); 
+    }
+    return address;
+  }
+
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       body: Stack(
         children: [
@@ -114,7 +122,6 @@ class _SelectLocationState extends State<SelectLocation> {
                     }
                   },
                   onCameraIdle: () {
-                    print('camera idle');
                     getAddressFromLatLng();
                   },
                   onTap: (latLng) {
@@ -198,8 +205,10 @@ class _SelectLocationState extends State<SelectLocation> {
                               Navigator.of(context).pushAndRemoveUntil(
                                 MaterialPageRoute(
                                   builder: (context) => Home(
-                                      destLocation!.latitude,
-                                      destLocation!.longitude),
+                                    destLocation!.latitude,
+                                    destLocation!.longitude,
+                                     _address ?? 'Unknown Location',
+                                  ),
                                 ),
                                 (route) => false,
                               );
@@ -274,7 +283,7 @@ class _SelectLocationState extends State<SelectLocation> {
           longitude: destLocation!.longitude,
           googleMapApiKey: apiKey);
       setState(() {
-        _address = data.address;
+        _address = formatAddress(data.address);
       });
     } catch (e) {
       print(e);
@@ -305,10 +314,10 @@ class _SelectLocationState extends State<SelectLocation> {
     if (permissionGranted == loc.PermissionStatus.granted) {
       location.changeSettings(accuracy: loc.LocationAccuracy.high);
 
-      // Get the location of the user
+      
       _currentPosition = await location.getLocation();
 
-      // Move the camera to the user's location
+      
       controller?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target:
             LatLng(_currentPosition!.latitude!, _currentPosition!.longitude!),

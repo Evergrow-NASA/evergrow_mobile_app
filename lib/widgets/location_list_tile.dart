@@ -20,9 +20,9 @@ class LocationListTile extends StatelessWidget {
         ListTile(
           onTap: press,
           horizontalTitleGap:
-              0, // Controla el espacio entre el leading y el título
+              0, 
           contentPadding:
-              EdgeInsets.zero, // Elimina el padding extra si es necesario
+              EdgeInsets.zero, 
           leading: SvgPicture.asset("assets/moisture_icon.svg"),
           title: Text(
             location,

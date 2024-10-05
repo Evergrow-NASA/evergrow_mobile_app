@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:evergrow_mobile_app/models/Temperature.dart';
+import 'package:evergrow_mobile_app/models/temperature_data.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -9,6 +9,8 @@ class WeatherService {
   Future<List<Temperature>?> fetchHourlyTemperature(double latitude, double longitude) async {
     String startDate = DateFormat('yyyyMMdd').format(DateTime.now());
     String endDate = DateFormat('yyyyMMdd').format(DateTime.now().add(const Duration(days: 1)));
+    startDate = "20241001";
+    endDate = "20241001";
     final String apiUrl = '$baseUrl?parameters=T2M&community=AG&longitude=$longitude&latitude=$latitude&start=$startDate&end=$endDate&format=JSON';
 
     try {
