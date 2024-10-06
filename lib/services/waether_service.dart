@@ -7,8 +7,8 @@ import 'package:intl/intl.dart';
 
 class WeatherService {
   final String baseUrl = 'https://api.meteomatics.com/';
-  final String username = 'medalith_tatiana';
-  final String password = 'l30wgOLbW7';
+  final String username = 'upc_abigail_lucero';
+  final String password = '8EbL4AdTs0';
 
   // Método para obtener la temperatura
   Future<List<Temperature>?> fetchHourlyTemperature(
@@ -98,7 +98,8 @@ class WeatherService {
     return null;
   }
 
-  Future<List<WindSpeed>?> fetchWindSpeed(double latitude, double longitude) async {
+  Future<List<WindSpeed>?> fetchWindSpeed(
+      double latitude, double longitude) async {
     String startDate =
         '${DateFormat('yyyy-MM-ddTHH:mm:ss').format(DateTime.now())}Z';
 
@@ -140,7 +141,8 @@ class WeatherService {
     return null;
   }
 
-  Future<List<WindDirection>?> fetchWindDirection(double latitude, double longitude) async {
+  Future<List<WindDirection>?> fetchWindDirection(
+      double latitude, double longitude) async {
     String startDate =
         '${DateFormat('yyyy-MM-ddTHH:mm:ss').format(DateTime.now())}Z';
 

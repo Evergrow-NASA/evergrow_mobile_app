@@ -223,117 +223,117 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildHomeContent() {
-  return Column(
-    children: [
-      const TopSection(),
-      Expanded(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
-            child: _isLoading
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      LocationRow(location: widget.location),
-                      const SizedBox(height: 30),
-                      ExpandableWeatherSection(
-                        title: 'Temperature',
-                        message: _temperatureMessage,
-                        iconData: Icons.wb_sunny,
-                        data: _temperatureData,
-                        times: _temperatureTimes,
-                        isExpanded: _isTemperatureExpanded,
-                        onExpandToggle: () {
-                          setState(() {
-                            _isTemperatureExpanded = !_isTemperatureExpanded;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 25),
-                      ExpandableWeatherSection(
-                        title: 'Wind',
-                        message: _windMessage,
-                        iconData: Icons.arrow_right_alt,
-                        data: _windData,
-                        times: _windTimes,
-                        directions: _windDirections,
-                        isExpanded: _isWindExpanded,
-                        onExpandToggle: () {
-                          setState(() {
-                            _isWindExpanded = !_isWindExpanded;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 25),
-                      ExpandableWeatherSection(
-                        title: 'Soil moisture',
-                        message: _soilMoistureMessage,
-                        iconData: Icons.water_drop,
-                        data: _soilMoistureData,
-                        times: _soilMoistureTimes,
-                        isExpanded: _isSoilMoistureExpanded,
-                        onExpandToggle: () {
-                          setState(() {
-                            _isSoilMoistureExpanded = !_isSoilMoistureExpanded;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 25),
-                      _buildWeatherCalendarHeader(),
-                      if (_isFilterVisible)
-                        const SizedBox(height: 10),
-                      WeatherTags(
-                        isFilterVisible: _isFilterVisible,
-                        toggleDroughtFilter: () {
-                          setState(() {
-                            _isDroughtSelected = !_isDroughtSelected;
-                          });
-                        },
-                        toggleRainFilter: () {
-                          setState(() {
-                            _isIntenseRainSelected = !_isIntenseRainSelected;
-                          });
-                        },
-                        toggleFrostFilter: () {
-                          setState(() {
-                            _isFrostSelected = !_isFrostSelected;
-                          });
-                        },
-                        toggleWindFilter: () {
-                          setState(() {
-                            _isStrongWindsSelected = !_isStrongWindsSelected;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 10),
-                      if (_isCalendarExtend)
-                        WeatherCalendar(
-                          isCalendarExtend: _isCalendarExtend,
-                          focusedDay: _focusedDay,
-                          selectedDay: _selectedDay,
-                          frostDates: _frostDates,
-                          droughtDates: _droughtDates,
-                          strongWindDates: _strongWindDates,
-                          intenseRainDates: _intenseRainDates,
-                          onDaySelected: (selectedDay, focusedDay) {
+    return Column(
+      children: [
+        const TopSection(),
+        Expanded(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        LocationRow(location: widget.location),
+                        const SizedBox(height: 30),
+                        ExpandableWeatherSection(
+                          title: 'Temperature',
+                          message: _temperatureMessage,
+                          iconData: Icons.wb_sunny,
+                          data: _temperatureData,
+                          times: _temperatureTimes,
+                          isExpanded: _isTemperatureExpanded,
+                          onExpandToggle: () {
                             setState(() {
-                              _selectedDay = selectedDay;
-                              _focusedDay = focusedDay;
+                              _isTemperatureExpanded = !_isTemperatureExpanded;
                             });
                           },
                         ),
-                    ],
-                  ),
+                        const SizedBox(height: 25),
+                        ExpandableWeatherSection(
+                          title: 'Wind',
+                          message: _windMessage,
+                          iconData: Icons.arrow_right_alt,
+                          data: _windData,
+                          times: _windTimes,
+                          directions: _windDirections,
+                          isExpanded: _isWindExpanded,
+                          onExpandToggle: () {
+                            setState(() {
+                              _isWindExpanded = !_isWindExpanded;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 25),
+                        ExpandableWeatherSection(
+                          title: 'Soil moisture',
+                          message: _soilMoistureMessage,
+                          iconData: Icons.water_drop,
+                          data: _soilMoistureData,
+                          times: _soilMoistureTimes,
+                          isExpanded: _isSoilMoistureExpanded,
+                          onExpandToggle: () {
+                            setState(() {
+                              _isSoilMoistureExpanded =
+                                  !_isSoilMoistureExpanded;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 25),
+                        _buildWeatherCalendarHeader(),
+                        if (_isFilterVisible) const SizedBox(height: 10),
+                        WeatherTags(
+                          isFilterVisible: _isFilterVisible,
+                          toggleDroughtFilter: () {
+                            setState(() {
+                              _isDroughtSelected = !_isDroughtSelected;
+                            });
+                          },
+                          toggleRainFilter: () {
+                            setState(() {
+                              _isIntenseRainSelected = !_isIntenseRainSelected;
+                            });
+                          },
+                          toggleFrostFilter: () {
+                            setState(() {
+                              _isFrostSelected = !_isFrostSelected;
+                            });
+                          },
+                          toggleWindFilter: () {
+                            setState(() {
+                              _isStrongWindsSelected = !_isStrongWindsSelected;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 10),
+                        if (_isCalendarExtend)
+                          WeatherCalendar(
+                            isCalendarExtend: _isCalendarExtend,
+                            focusedDay: _focusedDay,
+                            selectedDay: _selectedDay,
+                            frostDates: _frostDates,
+                            droughtDates: _droughtDates,
+                            strongWindDates: _strongWindDates,
+                            intenseRainDates: _intenseRainDates,
+                            onDaySelected: (selectedDay, focusedDay) {
+                              setState(() {
+                                _selectedDay = selectedDay;
+                                _focusedDay = focusedDay;
+                              });
+                            },
+                          ),
+                      ],
+                    ),
+            ),
           ),
         ),
-      ),
-    ],
-  );
-}
-
+      ],
+    );
+  }
 
   Widget _buildWeatherCalendarHeader() {
     return Row(
@@ -366,8 +366,7 @@ class _HomeState extends State<Home> {
                 setState(() {
                   _isCalendarExtend = !_isCalendarExtend;
                   if (!_isCalendarExtend) {
-                    _isFilterVisible =
-                        false; 
+                    _isFilterVisible = false;
                   }
                 });
               },

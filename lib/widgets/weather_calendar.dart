@@ -1,3 +1,4 @@
+import 'package:evergrow_mobile_app/constants.dart';
 import 'package:evergrow_mobile_app/screens/menu/details_day.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -39,43 +40,37 @@ class WeatherCalendar extends StatelessWidget {
         return isSameDay(selectedDay, day);
       },
       onDaySelected: (selectedDay, focusedDay) {
-        bool isDrought = droughtDates
-            .any((droughtDate) => isSameDay(droughtDate, selectedDay));
-        bool isFrost =
-            frostDates.any((frostDate) => isSameDay(frostDate, selectedDay));
-        bool isStrongWind = strongWindDates
-            .any((strongWindDate) => isSameDay(strongWindDate, selectedDay));
-        bool isIntenseRain = intenseRainDates
-            .any((intenseRainDate) => isSameDay(intenseRainDate, selectedDay));
-
-        if (isDrought || isFrost || isStrongWind || isIntenseRain) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => DetailsDay(
-                selectedDay: selectedDay,
-                isDroughtSelected: isDrought,
-                isFrostSelected: isFrost,
-                isStrongWindsSelected: isStrongWind,
-                isIntenseRainSelected: isIntenseRain,
-              ),
+        //if (isDrought || isFrost || isStrongWind || isIntenseRain) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailsDay(
+              selectedDay: selectedDay,
+              frostDates: frostDates,
+              droughtDates: droughtDates,
+              strongWindDates: strongWindDates,
+              intenseRainDates: intenseRainDates,
             ),
-          );
-        }
+          ),
+        );
+        //}
         onDaySelected(selectedDay, focusedDay);
       },
-      calendarStyle: CalendarStyle(
-        todayDecoration: const BoxDecoration(
+      calendarStyle: const CalendarStyle(
+        todayDecoration: BoxDecoration(
           color: AppTheme.primaryColor,
           shape: BoxShape.circle,
         ),
         selectedDecoration: BoxDecoration(
-          color: AppTheme.primaryColor,
-          border: Border.all(color: AppTheme.accentColor, width: 1),
+          color: Color.fromARGB(255, 154, 240, 217),
           shape: BoxShape.circle,
         ),
+        selectedTextStyle: TextStyle(
+          color: neutral,
+          fontWeight: FontWeight.bold,
+        ),
         outsideDaysVisible: false,
-        defaultTextStyle: const TextStyle(color: AppTheme.primaryColor),
+        defaultTextStyle: TextStyle(color: AppTheme.primaryColor),
       ),
       calendarBuilders: CalendarBuilders(
         markerBuilder: (context, day, events) {
