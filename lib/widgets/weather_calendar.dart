@@ -2,47 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../utils/theme.dart';
 
-class WeatherCalendar extends StatefulWidget {
+class WeatherCalendar extends StatelessWidget {
+  final bool isCalendarExtend;
+  final DateTime focusedDay;
+  final DateTime? selectedDay;
   final List<DateTime> frostDates;
   final List<DateTime> droughtDates;
   final List<DateTime> strongWindDates;
   final List<DateTime> intenseRainDates;
+  final Function(DateTime, DateTime) onDaySelected;
 
   const WeatherCalendar({
     super.key,
+    required this.isCalendarExtend,
+    required this.focusedDay,
+    required this.selectedDay,
     required this.frostDates,
     required this.droughtDates,
     required this.strongWindDates,
     required this.intenseRainDates,
+    required this.onDaySelected,
   });
 
   @override
-  State<WeatherCalendar> createState() => _WeatherCalendarState();
-}
-
-class _WeatherCalendarState extends State<WeatherCalendar> {
-  DateTime _focusedDay = DateTime.now();
-  DateTime? _selectedDay;
-
-  bool isSameDay(DateTime a, DateTime b) {
-    return a.year == b.year && a.month == b.month && a.day == b.day;
-  }
-
-  @override
   Widget build(BuildContext context) {
+    if (!isCalendarExtend) {
+      return Container();
+    }
+
     return TableCalendar(
       firstDay: DateTime.now().subtract(const Duration(days: 365)),
       lastDay: DateTime.now().add(const Duration(days: 365)),
-      focusedDay: _focusedDay,
+      focusedDay: focusedDay,
       selectedDayPredicate: (day) {
-        return isSameDay(_selectedDay!, day);
+        return isSameDay(selectedDay, day);
       },
-      onDaySelected: (selectedDay, focusedDay) {
-        setState(() {
-          _selectedDay = selectedDay;
-          _focusedDay = focusedDay;
-        });
-      },
+      onDaySelected: onDaySelected,
       calendarStyle: CalendarStyle(
         todayDecoration: const BoxDecoration(
           color: AppTheme.primaryColor,
@@ -58,18 +53,24 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
       ),
       calendarBuilders: CalendarBuilders(
         markerBuilder: (context, day, events) {
-          if (widget.frostDates.any((frostDate) => isSameDay(frostDate, day))) {
+          if (frostDates.any((frostDate) => isSameDay(frostDate, day))) {
             return _buildMarker(AppTheme.frostColorStroke);
           }
-          if (widget.droughtDates.any((droughtDate) => isSameDay(droughtDate, day))) {
+
+          if (droughtDates.any((droughtDate) => isSameDay(droughtDate, day))) {
             return _buildMarker(AppTheme.droughtColorStroke);
           }
-          if (widget.strongWindDates.any((strongWindDate) => isSameDay(strongWindDate, day))) {
+
+          if (strongWindDates
+              .any((strongWindDate) => isSameDay(strongWindDate, day))) {
             return _buildMarker(AppTheme.strongWindsColorStroke);
           }
-          if (widget.intenseRainDates.any((intenseRainDate) => isSameDay(intenseRainDate, day))) {
+
+          if (intenseRainDates
+              .any((intenseRainDate) => isSameDay(intenseRainDate, day))) {
             return _buildMarker(AppTheme.intenseRainColorStroke);
           }
+
           return null;
         },
       ),
@@ -80,14 +81,14 @@ class _WeatherCalendarState extends State<WeatherCalendar> {
     );
   }
 
-  Widget _buildMarker(Color borderColor) {
+  Widget _buildMarker(Color color) {
     return Container(
       width: 40,
       height: 50,
       decoration: BoxDecoration(
         color: Colors.transparent,
         shape: BoxShape.circle,
-        border: Border.fromBorderSide(BorderSide(color: borderColor, width: 1)),
+        border: Border.fromBorderSide(BorderSide(color: color, width: 1)),
       ),
     );
   }

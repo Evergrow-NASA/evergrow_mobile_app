@@ -3,14 +3,17 @@ import 'package:evergrow_mobile_app/models/temperature.dart';
 import 'package:evergrow_mobile_app/models/wind.dart';
 import 'package:evergrow_mobile_app/screens/menu/chatbot.dart';
 import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
+import 'package:evergrow_mobile_app/services/meteomatic_service.dart';
 import 'package:evergrow_mobile_app/services/waether_service.dart';
+import 'package:evergrow_mobile_app/utils/theme.dart';
 import 'package:evergrow_mobile_app/widgets/expandable_weather_section.dart';
 import 'package:evergrow_mobile_app/widgets/location_row.dart';
+import 'package:evergrow_mobile_app/widgets/weather_calendar.dart';
 import 'package:evergrow_mobile_app/widgets/weather_messages.dart';
+import 'package:evergrow_mobile_app/widgets/weather_tags.dart';
 import 'package:flutter/material.dart';
 import '../../components/top_section.dart';
 import '../../components/bottom_navigation.dart';
-
 
 class Home extends StatefulWidget {
   final String location;
@@ -24,7 +27,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-   int _selectedIndex = 1;
+  int _selectedIndex = 1;
   List<String> _windData = [];
   List<double> _windDirections = [];
   List<String> _windTimes = [];
@@ -34,6 +37,22 @@ class _HomeState extends State<Home> {
   List<String> _temperatureData = [];
   List<String> _temperatureTimes = [];
 
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  bool _isFilterVisible = false;
+  bool _isCalendarExtend = false;
+
+  bool _isLoading = true;
+
+  List<DateTime> _frostDates = [];
+  bool _isFrostSelected = false;
+  List<DateTime> _droughtDates = [];
+  bool _isDroughtSelected = false;
+  List<DateTime> _strongWindDates = [];
+  bool _isStrongWindsSelected = false;
+  List<DateTime> _intenseRainDates = [];
+  bool _isIntenseRainSelected = false;
+
   String _temperatureMessage = '';
   String _windMessage = '';
   String _soilMoistureMessage = '';
@@ -41,12 +60,85 @@ class _HomeState extends State<Home> {
   bool _isTemperatureExpanded = false;
   bool _isWindExpanded = false;
   bool _isSoilMoistureExpanded = false;
-  
+
   final WeatherMessages _weatherMessages = WeatherMessages();
   @override
   void initState() {
     super.initState();
+
     _fetchWeatherData();
+    _fetchFrostDates();
+    _fetchDroughtDates();
+    _fetchStrongWindDates();
+    _fetchIntenseRainDates();
+  }
+
+  Future<void> _fetchFrostDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> frostDates =
+          await meteomaticsService.fetchFrostDates(widget.lat, widget.lng);
+      setState(() {
+        _frostDates = frostDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de helada: $e');
+    }
+  }
+
+  Future<void> _fetchDroughtDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> droughtDates =
+          await meteomaticsService.fetchDroughtDates(widget.lat, widget.lng);
+      setState(() {
+        _droughtDates = droughtDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de sequía: $e');
+    }
+  }
+
+  Future<void> _fetchStrongWindDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> strongWindDates =
+          await meteomaticsService.fetchStrongWindDates(widget.lat, widget.lng);
+      setState(() {
+        _strongWindDates = strongWindDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de vientos fuertes: $e');
+    }
+  }
+
+  Future<void> _fetchIntenseRainDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> intenseRainDates =
+          await meteomaticsService.fetchHeavyRainDates(widget.lat, widget.lng);
+      setState(() {
+        _intenseRainDates = intenseRainDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de lluvias intensas: $e');
+    }
   }
 
   Future<void> _fetchWeatherData() async {
@@ -86,10 +178,11 @@ class _HomeState extends State<Home> {
           _soilMoistureTimes =
               soilMoistureData.map((soil) => _extractHour(soil.time)).toList();
 
-          _temperatureMessage = _weatherMessages.generateTemperatureMessage(temperatures);
+          _temperatureMessage =
+              _weatherMessages.generateTemperatureMessage(temperatures);
           _windMessage = _weatherMessages.generateWindMessage(windSpeeds);
-          _soilMoistureMessage =
-              _weatherMessages.generateSoilMoistureMessage(soilMoistureData, depth);
+          _soilMoistureMessage = _weatherMessages.generateSoilMoistureMessage(
+              soilMoistureData, depth);
         });
       }
     } catch (e) {
@@ -105,7 +198,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +209,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-Widget _getContentWidget(int index) {
+  Widget _getContentWidget(int index) {
     switch (index) {
       case 0:
         return const ChatbotScreen();
@@ -129,8 +221,6 @@ Widget _getContentWidget(int index) {
         return _buildHomeContent();
     }
   }
-
-
 
   Widget _buildHomeContent() {
     return Column(
@@ -188,6 +278,50 @@ Widget _getContentWidget(int index) {
                       });
                     },
                   ),
+                  const SizedBox(height: 25),
+                  _buildWeatherCalendarHeader(),
+                  const SizedBox(height: 15),
+                  if (_isFilterVisible)
+                    WeatherTags(
+                      isFilterVisible: _isFilterVisible,
+                      toggleDroughtFilter: () {
+                        setState(() {
+                          _isDroughtSelected = !_isDroughtSelected;
+                        });
+                      },
+                      toggleRainFilter: () {
+                        setState(() {
+                          _isIntenseRainSelected = !_isIntenseRainSelected;
+                        });
+                      },
+                      toggleFrostFilter: () {
+                        setState(() {
+                          _isFrostSelected = !_isFrostSelected;
+                        });
+                      },
+                      toggleWindFilter: () {
+                        setState(() {
+                          _isStrongWindsSelected = !_isStrongWindsSelected;
+                        });
+                      },
+                    ),
+                  const SizedBox(height: 15),
+                  if (_isCalendarExtend)
+                    WeatherCalendar(
+                      isCalendarExtend: _isCalendarExtend,
+                      focusedDay: _focusedDay,
+                      selectedDay: _selectedDay,
+                      frostDates: _frostDates,
+                      droughtDates: _droughtDates,
+                      strongWindDates: _strongWindDates,
+                      intenseRainDates: _intenseRainDates,
+                      onDaySelected: (selectedDay, focusedDay) {
+                        setState(() {
+                          _selectedDay = selectedDay;
+                          _focusedDay = focusedDay;
+                        });
+                      },
+                    ),
                 ],
               ),
             ),
@@ -196,7 +330,54 @@ Widget _getContentWidget(int index) {
       ],
     );
   }
-}
+
+  Widget _buildWeatherCalendarHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        const Text(
+          'Weather Calendar',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
+          ),
+        ),
+        Row(
+          children: [
+            if (_isCalendarExtend)
+              IconButton(
+                icon: Icon(
+                  _isFilterVisible ? Icons.filter_alt_off : Icons.filter_alt,
+                  color: AppTheme.primaryColor,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isFilterVisible = !_isFilterVisible;
+                  });
+                },
+              ),
+            IconButton(
+              onPressed: () {
+                setState(() {
+                  _isCalendarExtend = !_isCalendarExtend;
+                  if (!_isCalendarExtend) {
+                    _isFilterVisible =
+                        false; 
+                  }
+                });
+              },
+              icon: Icon(
+                _isCalendarExtend ? Icons.expand_less : Icons.expand_more,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            // Botón de filtro, solo visible cuando el calendario está expandido
+          ],
+        ),
+      ],
+    );
+  }
 
   String _extractHour(String time) {
     int hourInt = int.parse(time.split(':')[0]);
@@ -210,3 +391,4 @@ Widget _getContentWidget(int index) {
 
     return '$hourInt $period';
   }
+}
