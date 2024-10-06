@@ -23,11 +23,13 @@ class _SelectLocationState extends State<SelectLocation> {
   List<AutocompletePrediction> predictions = [];
   final TextEditingController _searchController = TextEditingController();
 
-  LatLng? destLocation = const LatLng(40.7128, -74.0060); 
+  LatLng? destLocation = const LatLng(40.7128, -74.0060);
   Location location = Location();
   loc.LocationData? _currentPosition;
   final Completer<GoogleMapController?> _controller = Completer();
   String? _address;
+  bool _showLocationPredictions = false;
+  bool _updatingFromMap = false;
 
   @override
   void initState() {
@@ -35,6 +37,15 @@ class _SelectLocationState extends State<SelectLocation> {
     getCurrentLocation();
 
     _searchController.addListener(() {
+      if (_searchController.text.isNotEmpty && !_updatingFromMap) {
+        setState(() {
+          _showLocationPredictions = true;
+        });
+      } else {
+        setState(() {
+          _showLocationPredictions = false;
+        });
+      }
       placeAutoComplete(_searchController.text);
     });
   }
@@ -77,7 +88,8 @@ class _SelectLocationState extends State<SelectLocation> {
       setState(() {
         _searchController.text = formattedAddress;
         predictions.clear();
-        _address = formatAddress(formattedAddress); 
+        _showLocationPredictions = false;
+        _address = formatAddress(formattedAddress);
       });
 
       final GoogleMapController? controller = await _controller.future;
@@ -92,188 +104,9 @@ class _SelectLocationState extends State<SelectLocation> {
   String formatAddress(String address) {
     List<String> parts = address.split(',');
     if (parts.isNotEmpty) {
-      return parts.sublist(1).join(',').trim(); 
+      return parts.sublist(1).join(',').trim();
     }
     return address;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Expanded(
-                child: GoogleMap(
-                  zoomControlsEnabled: false,
-                  initialCameraPosition: CameraPosition(
-                    target: destLocation!,
-                    zoom: 16,
-                  ),
-                  onCameraMove: (CameraPosition? position) {
-                    if (destLocation != position!.target) {
-                      setState(() {
-                        destLocation = position.target;
-                        _searchController.text =
-                            _address ?? 'Select your location';
-                      });
-                    }
-                  },
-                  onCameraIdle: () {
-                    getAddressFromLatLng();
-                  },
-                  onTap: (latLng) {
-                    print(latLng);
-                  },
-                  onMapCreated: (GoogleMapController controller) {
-                    _controller.complete(controller);
-                  },
-                ),
-              ),
-              Container(
-                  height: 300.0,
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Select your location',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: TextFormField(
-                          onChanged: (value) {
-                            placeAutoComplete(value);
-                          },
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            filled: true,
-                            fillColor: secondary3,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10),
-                              borderSide: BorderSide.none,
-                            ),
-                            suffixIcon: const Icon(Icons.search),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      Expanded(
-                        child: ListView.builder(
-                          padding: EdgeInsets.zero,
-                          itemCount: predictions.length,
-                          itemBuilder: (context, index) => LocationListTile(
-                            press: () {
-                              _selectLocation(predictions[index].placeId!);
-                            },
-                            location: predictions[index].description!,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      SizedBox(
-                        width: double.infinity,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: neutral,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.15),
-                                offset: const Offset(0, 4),
-                                blurRadius: 8,
-                                spreadRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pushAndRemoveUntil(
-                                MaterialPageRoute(
-                                  builder: (context) => Home(
-                                    destLocation!.latitude,
-                                    destLocation!.longitude,
-                                     _address ?? 'Unknown Location',
-                                  ),
-                                ),
-                                (route) => false,
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              padding:
-                                  const EdgeInsets.symmetric(vertical: 16.0),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                            ),
-                            child: const Text(
-                              'Confirm',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  )),
-            ],
-          ),
-          Align(
-            alignment: Alignment.topCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(top: 350.0),
-              child: Image.asset(
-                'assets/icons/pick.png',
-                height: 45,
-                width: 45,
-              ),
-            ),
-          ),
-          Positioned(
-            top: 40,
-            left: 20,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/');
-              },
-              child: Container(
-                height: 40,
-                width: 40,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: neutral,
-                    width: 2.0,
-                  ),
-                ),
-                child: const Center(
-                  child: Icon(
-                    Icons.close,
-                    color: neutral,
-                    size: 30,
-                  ),
-                ),
-              ),
-            ),
-          )
-        ],
-      ),
-    );
   }
 
   getAddressFromLatLng() async {
@@ -314,10 +147,8 @@ class _SelectLocationState extends State<SelectLocation> {
     if (permissionGranted == loc.PermissionStatus.granted) {
       location.changeSettings(accuracy: loc.LocationAccuracy.high);
 
-      
       _currentPosition = await location.getLocation();
 
-      
       controller?.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
         target:
             LatLng(_currentPosition!.latitude!, _currentPosition!.longitude!),
@@ -328,5 +159,249 @@ class _SelectLocationState extends State<SelectLocation> {
             LatLng(_currentPosition!.latitude!, _currentPosition!.longitude!);
       });
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Stack(
+        children: [
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _getMap(),
+              _buildContainerSelectLocation(),
+            ],
+          ),
+          if (!_showLocationPredictions) _getPickIcon(),
+          _getCloseIcon(),
+        ],
+      ),
+    );
+  }
+
+  Widget _getMap() {
+    return Expanded(
+      child: GoogleMap(
+        zoomControlsEnabled: false,
+        initialCameraPosition: CameraPosition(
+          target: destLocation!,
+          zoom: 16,
+        ),
+        onCameraMove: (CameraPosition? position) {
+          if (destLocation != position!.target) {
+            setState(() {
+              _updatingFromMap = true;
+              destLocation = position.target;
+              _searchController.text = _address ?? 'Select your location';
+            });
+          }
+        },
+        onCameraIdle: () {
+          getAddressFromLatLng();
+          setState(() {
+            _updatingFromMap = false;
+          });
+        },
+        onTap: (latLng) {
+          print(latLng);
+        },
+        onMapCreated: (GoogleMapController controller) {
+          _controller.complete(controller);
+        },
+      ),
+    );
+  }
+
+  Widget _getPickIcon() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 350.0),
+        child: Image.asset(
+          'assets/icons/pick.png',
+          height: 45,
+          width: 45,
+        ),
+      ),
+    );
+  }
+
+  Widget _getCloseIcon() {
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 40.0, left: 20.0),
+        child: GestureDetector(
+          onTap: () {
+            if (predictions.isEmpty) {
+              Navigator.pushNamed(context, '/');
+            } else {
+              setState(() {
+                _showLocationPredictions = false;
+                predictions.clear();
+              });
+            }
+          },
+          child: Container(
+            height: 40,
+            width: 40,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: neutral,
+                width: 2.0,
+              ),
+            ),
+            child: const Center(
+              child: Icon(
+                Icons.close,
+                color: neutral,
+                size: 30,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContainerSelectLocation() {
+    double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    double containerHeight = _showLocationPredictions ? 740 : 250;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 0),
+      height: containerHeight - keyboardHeight,
+      padding: const EdgeInsets.all(16.0),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Select your location',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildTextField(),
+          const SizedBox(height: 10),
+          if (_showLocationPredictions)
+            Expanded(
+              child: _buildLocationList(),
+            ),
+          const SizedBox(height: 20),
+          if (!_showLocationPredictions) _buildConfirmButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationList() {
+    return ListView.builder(
+      padding: EdgeInsets.zero,
+      itemCount: predictions.length,
+      itemBuilder: (context, index) {
+        return LocationListTile(
+          location: predictions[index].description!,
+          press: () {
+            setState(() {
+              _searchController.text = predictions[index].description!;
+              _showLocationPredictions =
+                  false; // Ocultar las predicciones después de seleccionar
+            });
+
+            // Luego obtenemos más detalles sobre la ubicación seleccionada
+            _selectLocation(predictions[index].placeId!);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildTextField() {
+    return SizedBox(
+      width: double.infinity,
+      child: TextFormField(
+        onTap: () {
+          setState(() {
+            _showLocationPredictions = true;
+          });
+        },
+        onChanged: (value) {
+          if (value.isNotEmpty && !_updatingFromMap) {
+            placeAutoComplete(value);
+          } else {
+            setState(() {
+              _showLocationPredictions = false;
+            });
+          }
+        },
+        controller: _searchController,
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: secondary3,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(10),
+            borderSide: BorderSide.none,
+          ),
+          suffixIcon: const Icon(Icons.search),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildConfirmButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: Container(
+        decoration: BoxDecoration(
+          color: neutral,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              offset: const Offset(0, 4),
+              blurRadius: 8,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => Home(
+                  destLocation!.latitude,
+                  destLocation!.longitude,
+                  _address ?? 'Unknown Location',
+                ),
+              ),
+              (route) => false,
+            );
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: const Text(
+            'Confirm',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+      ),
+    );
   }
 }
