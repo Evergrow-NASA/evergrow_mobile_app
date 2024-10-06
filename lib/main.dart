@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         splashColor: Colors.transparent,
       ),
       debugShowCheckedModeBanner: false,
-      initialRoute: '/',
+      initialRoute: '/home',
       onGenerateRoute: (RouteSettings settings) {
         WidgetBuilder builder;
         switch (settings.name) {
@@ -34,9 +34,10 @@ class MyApp extends StatelessWidget {
             builder = (BuildContext context) => const SelectLocation();
             break;
           case '/home':
-            final args = settings.arguments as Map<String, double>;
-            builder = (BuildContext context) => Home(args['latitude']!,
-                args['longitude']!, args['location'] as String);
+            //final args = settings.arguments as Map<String, double>;
+            //builder = (BuildContext context) => Home(args['latitude']!,
+                //args['longitude']!, args['location'] as String);
+              builder=  (BuildContext context) => const Home(-13.484365, -76.057439, "Ayacucho");
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
