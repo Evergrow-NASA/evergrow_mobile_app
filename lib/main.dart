@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
             final args = settings.arguments as Map<String, double>;
             builder = (BuildContext context) => Home(args['latitude']!,
                 args['longitude']!, args['location'] as String);
+              
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');
