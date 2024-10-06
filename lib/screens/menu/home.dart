@@ -1,4 +1,5 @@
 import 'package:evergrow_mobile_app/models/temperature_data.dart';
+import 'package:evergrow_mobile_app/screens/menu/chatbot.dart';
 import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
 import 'package:evergrow_mobile_app/services/waether_service.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +71,7 @@ class _HomeState extends State<Home> {
   Widget _getContentWidget(int index) {
     switch (index) {
       case 0:
-       // return const SoilMoistureScreen();
+       return const ChatbotScreen();
       case 1:
         return _buildHomeContent();
       case 2:
