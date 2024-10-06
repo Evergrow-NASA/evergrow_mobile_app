@@ -183,4 +183,42 @@ class WeatherService {
     }
     return null;
   }
+
+  // Metodo para obtener el tiempo promedio de temperatura en base a 1 dia en especifico como parametro
+  Future<double> fetchAverageTemperature(
+      double latitude, double longitude, String date) async {
+    String startDate = '${date}T00:00:00Z';
+    String endDate = '${date}T23:59:59Z';
+
+    final String apiUrl =
+        '$baseUrl/$startDate--$endDate:PT1H/t_2m:C/$latitude,$longitude/json';
+
+    final response = await http.get(Uri.parse(apiUrl), headers: {
+      'Authorization':
+          'Basic ${base64Encode(utf8.encode('$username:$password'))}',
+    });
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+
+      if (jsonData['data'][0]['coordinates'][0]['dates'] != null) {
+        List<dynamic> dateEntries =
+            jsonData['data'][0]['coordinates'][0]['dates'];
+
+        double sum = 0;
+        int count = 0;
+
+        for (var entry in dateEntries) {
+          sum += entry['value'].toDouble();
+          count++;
+        }
+
+        return sum / count;
+      } else {
+        throw Exception(
+            'No se encontraron datos de temperatura para las fechas seleccionadas.');
+      }
+    }
+    return 0;
+  }
 }

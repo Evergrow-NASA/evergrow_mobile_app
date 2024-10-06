@@ -12,6 +12,8 @@ class WeatherCalendar extends StatelessWidget {
   final List<DateTime> droughtDates;
   final List<DateTime> strongWindDates;
   final List<DateTime> intenseRainDates;
+  final double latitude;
+  final double longitude;
   final Function(DateTime, DateTime) onDaySelected;
 
   const WeatherCalendar({
@@ -23,6 +25,8 @@ class WeatherCalendar extends StatelessWidget {
     required this.droughtDates,
     required this.strongWindDates,
     required this.intenseRainDates,
+    required this.latitude,
+    required this.longitude,
     required this.onDaySelected,
   });
 
@@ -50,6 +54,8 @@ class WeatherCalendar extends StatelessWidget {
               droughtDates: droughtDates,
               strongWindDates: strongWindDates,
               intenseRainDates: intenseRainDates,
+              latitude: latitude,
+              longitude: longitude,
             ),
           ),
         );

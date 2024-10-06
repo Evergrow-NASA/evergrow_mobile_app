@@ -42,3 +42,8 @@ flutter:
     - assets/icons/frost.png
     - assets/icons/intense_rain.png
     - assets/icons/strong_winds.png
+    - assets/icons/drought_recommendation.png
+    - assets/icons/frost_recommendation.png
+    - assets/icons/rain_recommendation.png
+    - assets/icons/wind_recommendation.png
+

@@ -319,6 +319,8 @@ class _HomeState extends State<Home> {
                             droughtDates: _droughtDates,
                             strongWindDates: _strongWindDates,
                             intenseRainDates: _intenseRainDates,
+                            latitude: widget.lat,
+                            longitude: widget.lng,
                             onDaySelected: (selectedDay, focusedDay) {
                               setState(() {
                                 _selectedDay = selectedDay;
@@ -375,7 +377,6 @@ class _HomeState extends State<Home> {
                 color: AppTheme.primaryColor,
               ),
             ),
-            // Botón de filtro, solo visible cuando el calendario está expandido
           ],
         ),
       ],
