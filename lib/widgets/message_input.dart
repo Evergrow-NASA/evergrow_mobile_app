@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:evergrow_mobile_app/utils/theme.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
-class MessageInput extends StatelessWidget {
+class MessageInput extends StatefulWidget {
   final TextEditingController controller;
   final bool hasText;
-  final bool isVoiceRecording;
   final Function(String) onSend;
   final VoidCallback onToggleRecording;
 
@@ -12,10 +12,23 @@ class MessageInput extends StatelessWidget {
     super.key,
     required this.controller,
     required this.hasText,
-    required this.isVoiceRecording,
     required this.onSend,
     required this.onToggleRecording,
   });
+
+  @override
+  State<MessageInput> createState() => _MessageInputState();
+}
+
+class _MessageInputState extends State<MessageInput> {
+  late stt.SpeechToText _speech;
+  bool _isListening = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _speech = stt.SpeechToText();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +38,7 @@ class MessageInput extends StatelessWidget {
         children: [
           Expanded(
             child: TextField(
-              controller: controller,
+              controller: widget.controller,
               decoration: InputDecoration(
                 hintText: 'Type your message...',
                 hintStyle: const TextStyle(color: AppTheme.primaryColor),
@@ -39,11 +52,11 @@ class MessageInput extends StatelessWidget {
                 ),
               ),
               onChanged: (value) {
-                // Esto puede manejarse externamente, si lo necesitas.
+                setState(() {}); // Rebuild the widget to update the icon
               },
               onSubmitted: (value) {
                 if (value.isNotEmpty) {
-                  onSend(value);
+                  widget.onSend(value);
                 }
               },
             ),
@@ -56,18 +69,23 @@ class MessageInput extends StatelessWidget {
             ),
             child: IconButton(
               icon: Icon(
-                hasText ? Icons.send : isVoiceRecording ? Icons.stop : Icons.mic,
+                widget.controller.text.isNotEmpty
+                    ? Icons.send
+                    : _isListening
+                        ? Icons.stop
+                        : Icons.mic,
                 color: Colors.white,
                 size: 28,
               ),
               onPressed: () {
-                if (hasText) {
-                  if (controller.text.isNotEmpty) {
-                    onSend(controller.text);
-                    controller.clear();
-                  }
+                if (widget.controller.text.isNotEmpty) {
+                  // If there's text, send it
+                  widget.onSend(widget.controller.text);
+                  widget.controller.clear();
+                  setState(() {}); // Ensure UI updates
                 } else {
-                  onToggleRecording();
+                  // Toggle recording (start/stop)
+                  _toggleRecording();
                 }
               },
             ),
@@ -75,5 +93,28 @@ class MessageInput extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  void _toggleRecording() async {
+    if (_isListening) {
+      // Stop listening
+      setState(() {
+        _isListening = false;
+        _speech.stop();
+      });
+    } else {
+      // Start listening
+      bool available = await _speech.initialize();
+      if (available) {
+        setState(() {
+          _isListening = true;
+        });
+        _speech.listen(onResult: (val) {
+          setState(() {
+            widget.controller.text = val.recognizedWords;
+          });
+        });
+      }
+    }
   }
 }

@@ -6,6 +6,8 @@ class TopSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+
     return Stack(
       children: [
         ClipPath(
@@ -41,15 +43,21 @@ class TopSection extends StatelessWidget {
             ],
           ),
         ),
-        const Positioned(
-          top: 50,
-          right: 20,
-          child: Icon(
-            Icons.settings,
-            color: AppTheme.primaryColor,
-            size: 30,
+        if (currentRoute != '/settings')
+          Positioned(
+            top: 50,
+            right: 20,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushNamed(context, '/settings');
+              },
+              child: const Icon(
+                Icons.settings,
+                color: AppTheme.primaryColor,
+                size: 30,
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
