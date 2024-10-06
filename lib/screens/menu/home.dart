@@ -1,7 +1,10 @@
-import 'package:evergrow_mobile_app/models/temperature_data.dart';
+
+import 'package:evergrow_mobile_app/models/temperature.dart';
 import 'package:evergrow_mobile_app/screens/menu/chatbot.dart';
 import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
+import 'package:evergrow_mobile_app/services/meteomatic_service.dart';
 import 'package:evergrow_mobile_app/services/waether_service.dart';
+import 'package:evergrow_mobile_app/widgets/weather_tag.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../components/top_section.dart';
@@ -27,10 +30,23 @@ class _HomeState extends State<Home> {
   List<Temperature> _weatherData = [];
   bool _isLoading = true;
 
+  List<DateTime> _frostDates = [];
+  bool _isFrostSelected = false;
+  List<DateTime> _droughtDates = [];
+  bool _isDroughtSelected = false;
+  List<DateTime> _strongWindDates = [];
+  bool _isStrongWindsSelected = false;
+  List<DateTime> _intenseRainDates = [];
+  bool _isIntenseRainSelected = false;
+
   @override
   void initState() {
     super.initState();
     _fetchWeatherData();
+    _fetchFrostDates();
+    _fetchDroughtDates();
+    _fetchStrongWindDates();
+    _fetchIntenseRainDates();
   }
 
   Future<void> _fetchWeatherData() async {
@@ -48,6 +64,74 @@ class _HomeState extends State<Home> {
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future<void> _fetchFrostDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> frostDates =
+          await meteomaticsService.fetchFrostDates(widget.lat, widget.lng);
+      setState(() {
+        _frostDates = frostDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de helada: $e');
+    }
+  }
+
+  Future<void> _fetchDroughtDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> droughtDates =
+          await meteomaticsService.fetchDroughtDates(widget.lat, widget.lng);
+      setState(() {
+        _droughtDates = droughtDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de sequía: $e');
+    }
+  }
+
+  Future<void> _fetchStrongWindDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> strongWindDates =
+          await meteomaticsService.fetchStrongWindDates(widget.lat, widget.lng);
+      setState(() {
+        _strongWindDates = strongWindDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de vientos fuertes: $e');
+    }
+  }
+
+  Future<void> _fetchIntenseRainDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> intenseRainDates =
+          await meteomaticsService.fetchHeavyRainDates(widget.lat, widget.lng);
+      setState(() {
+        _intenseRainDates = intenseRainDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de lluvias intensas: $e');
     }
   }
 
@@ -71,6 +155,7 @@ class _HomeState extends State<Home> {
   Widget _getContentWidget(int index) {
     switch (index) {
       case 0:
+
        return const ChatbotScreen();
       case 1:
         return _buildHomeContent();
@@ -95,12 +180,12 @@ class _HomeState extends State<Home> {
                 children: [
                   _buildLocationRow(),
                   const SizedBox(height: 20),
-                  _buildSectionTitle('Temperatura'),
+                  _buildSectionTitle('Temperature'),
                   const SizedBox(height: 10),
                   const Text(
-                    'Condiciones soleadas continuarán hasta las 6 p.m.',
-                    style: TextStyle(
-                        fontSize: 14, color: AppTheme.secondaryColor),
+                    'Sunny conditions will continue up to 6 pm',
+                    style:
+                        TextStyle(fontSize: 14, color: AppTheme.secondaryColor),
                   ),
                   const Divider(height: 30, color: AppTheme.secondaryColor),
                   _isLoading
@@ -136,8 +221,7 @@ class _HomeState extends State<Home> {
         Expanded(
           child: Text(
             widget.location,
-            style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             overflow: TextOverflow.ellipsis,
           ),
         ),
@@ -150,7 +234,7 @@ class _HomeState extends State<Home> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: _weatherData.map((data) {
-          String hour = _extractHour(data.date);
+          String hour = _extractHour(data.time);
           IconData weatherIcon = _getWeatherIcon(data.temperature);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -165,21 +249,26 @@ class _HomeState extends State<Home> {
     );
   }
 
-    String _extractHour(String dateTimeKey) {
-    String hour = dateTimeKey.substring(8);
-    int hourInt = int.parse(hour);
-    String period = hourInt >= 12 ? 'PM' : 'AM';
-    hourInt = hourInt > 12 ? hourInt - 12 : hourInt == 0 ? 12 : hourInt;
-    return '$hourInt:00 $period';
+  String _extractHour(String time) {
+    int hourInt = int.parse(time.split(':')[0]);
+    String period = hourInt >= 12 ? 'p.m.' : 'a.m.';
+
+    hourInt = hourInt > 12
+        ? hourInt - 12
+        : hourInt == 0
+            ? 12
+            : hourInt;
+
+    return '$hourInt $period';
   }
 
   IconData _getWeatherIcon(double temperature) {
     if (temperature >= 30) {
-      return Icons.wb_sunny; 
+      return Icons.wb_sunny;
     } else if (temperature >= 20) {
-      return Icons.wb_cloudy; 
+      return Icons.wb_cloudy;
     } else {
-      return Icons.ac_unit; 
+      return Icons.ac_unit;
     }
   }
 
@@ -187,7 +276,7 @@ class _HomeState extends State<Home> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _buildSectionTitle('Calendario Climático'),
+        _buildSectionTitle('Weather calendar'),
         IconButton(
           icon: Icon(
             _isFilterVisible ? Icons.filter_alt_off : Icons.filter_alt,
@@ -204,14 +293,79 @@ class _HomeState extends State<Home> {
   }
 
   Widget _buildWeatherTags() {
-    return Row(
-      children: [
-        _buildWeatherTag('Sequía', AppTheme.accentColor),
-        const SizedBox(width: 8),
-        _buildWeatherTag('Inundación', AppTheme.floodColor),
-        const SizedBox(width: 8),
-        _buildWeatherTag('Helada', AppTheme.frostColor),
-      ],
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          WeatherTag(
+            label: 'Drought',
+            colorFill: AppTheme.droughtColorFill,
+            colorStroke: AppTheme.droughtColorStroke,
+            imagePath: 'assets/icons/drought.png',
+            fetchDates: () {
+              setState(() {
+                _isDroughtSelected = !_isDroughtSelected;
+                if (_isDroughtSelected) {
+                  _fetchDroughtDates();
+                } else {
+                  _droughtDates.clear();
+                }
+              });
+            },
+          ),
+          const SizedBox(width: 8),
+          WeatherTag(
+            label: 'Intense rain',
+            colorFill: AppTheme.intenseRainColorFill,
+            colorStroke: AppTheme.intenseRainColorStroke,
+            imagePath: 'assets/icons/intense_rain.png',
+            fetchDates: () {
+              setState(() {
+                _isIntenseRainSelected = !_isIntenseRainSelected;
+                if (_isIntenseRainSelected) {
+                  _fetchIntenseRainDates();
+                } else {
+                  _intenseRainDates.clear();
+                }
+              });
+            },
+          ),
+          const SizedBox(width: 8),
+          WeatherTag(
+            label: 'Frost',
+            colorFill: AppTheme.frostColorFill,
+            colorStroke: AppTheme.frostColorStroke,
+            imagePath: 'assets/icons/frost.png',
+            fetchDates: () {
+              setState(() {
+                _isFrostSelected = !_isFrostSelected;
+                if (_isFrostSelected) {
+                  _fetchFrostDates();
+                } else {
+                  _frostDates.clear();
+                }
+              });
+            },
+          ),
+          const SizedBox(width: 8),
+          WeatherTag(
+            label: 'Strong winds',
+            colorFill: AppTheme.strongWindsColorFill,
+            colorStroke: AppTheme.strongWindsColorStroke,
+            imagePath: 'assets/icons/strong_winds.png',
+            fetchDates: () {
+              setState(() {
+                _isStrongWindsSelected = !_isStrongWindsSelected;
+                if (_isStrongWindsSelected) {
+                  _fetchStrongWindDates();
+                } else {
+                  _strongWindDates.clear();
+                }
+              });
+            },
+          ),
+        ],
+      ),
     );
   }
 
@@ -235,13 +389,79 @@ class _HomeState extends State<Home> {
           shape: BoxShape.circle,
         ),
         selectedDecoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.primaryColor,
           border: Border.all(color: AppTheme.accentColor, width: 1),
           shape: BoxShape.circle,
         ),
         outsideDaysVisible: false,
-        selectedTextStyle:
-            const TextStyle(color: AppTheme.primaryColor),
+        defaultTextStyle: const TextStyle(color: AppTheme.primaryColor),
+      ),
+      calendarBuilders: CalendarBuilders(
+        markerBuilder: (context, day, events) {
+          bool isSameDay(DateTime a, DateTime b) {
+            return a.year == b.year && a.month == b.month && a.day == b.day;
+          }
+
+          if (_frostDates.any((frostDate) => isSameDay(frostDate, day))) {
+            return Container(
+              width: 40,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.fromBorderSide(
+                  BorderSide(color: AppTheme.frostColorStroke, width: 1),
+                ),
+              ),
+            );
+          }
+
+          if (_droughtDates.any((droughtDate) => isSameDay(droughtDate, day))) {
+            return Container(
+              width: 40,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.fromBorderSide(
+                  BorderSide(color: AppTheme.droughtColorStroke, width: 1),
+                ),
+              ),
+            );
+          }
+
+          if (_strongWindDates
+              .any((strongWindDate) => isSameDay(strongWindDate, day))) {
+            return Container(
+              width: 40,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.fromBorderSide(
+                  BorderSide(color: AppTheme.strongWindsColorStroke, width: 1),
+                ),
+              ),
+            );
+          }
+
+          if (_intenseRainDates
+              .any((intenseRainDate) => isSameDay(intenseRainDate, day))) {
+            return Container(
+              width: 40,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.fromBorderSide(
+                  BorderSide(color: AppTheme.intenseRainColorStroke, width: 1),
+                ),
+              ),
+            );
+          }
+
+          return null;
+        },
       ),
       headerStyle: const HeaderStyle(
         formatButtonVisible: false,
@@ -264,28 +484,9 @@ class _HomeState extends State<Home> {
         ),
         Text(
           time,
-          style:
-              const TextStyle(fontSize: 12, color: AppTheme.secondaryColor),
+          style: const TextStyle(fontSize: 12, color: AppTheme.secondaryColor),
         ),
       ],
-    );
-  }
-
-  Widget _buildWeatherTag(String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.2),
-        border: Border.all(color: color, width: 1),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
     );
   }
 

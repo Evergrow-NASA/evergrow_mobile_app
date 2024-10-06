@@ -37,3 +37,7 @@ flutter:
     - assets/moisture_icon.svg
     - assets/icons/pick.png
     - assets/icons/close.png
+    - assets/icons/drought.png
+    - assets/icons/frost.png
+    - assets/icons/intense_rain.png
+    - assets/icons/strong_winds.png
