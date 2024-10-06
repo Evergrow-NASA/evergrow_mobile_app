@@ -34,6 +34,8 @@ class _HomeState extends State<Home> {
   bool _isDroughtSelected = false;
   List<DateTime> _strongWindDates = [];
   bool _isStrongWindsSelected = false;
+  List<DateTime> _intenseRainDates = [];
+  bool _isIntenseRainSelected = false;
 
   @override
   void initState() {
@@ -42,6 +44,7 @@ class _HomeState extends State<Home> {
     _fetchFrostDates();
     _fetchDroughtDates();
     _fetchStrongWindDates();
+    _fetchIntenseRainDates();
   }
 
   Future<void> _fetchWeatherData() async {
@@ -110,6 +113,23 @@ class _HomeState extends State<Home> {
         _isLoading = false;
       });
       print('Error al obtener las fechas de vientos fuertes: $e');
+    }
+  }
+
+  Future<void> _fetchIntenseRainDates() async {
+    MeteomaticsService meteomaticsService = MeteomaticsService();
+    try {
+      List<DateTime> intenseRainDates =
+          await meteomaticsService.fetchHeavyRainDates(widget.lat, widget.lng);
+      setState(() {
+        _intenseRainDates = intenseRainDates;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+      });
+      print('Error al obtener las fechas de lluvias intensas: $e');
     }
   }
 
@@ -295,7 +315,16 @@ class _HomeState extends State<Home> {
             colorFill: AppTheme.intenseRainColorFill,
             colorStroke: AppTheme.intenseRainColorStroke,
             imagePath: 'assets/icons/intense_rain.png',
-            fetchDates: null,
+            fetchDates: () {
+              setState(() {
+                _isIntenseRainSelected = !_isIntenseRainSelected;
+                if (_isIntenseRainSelected) {
+                  _fetchIntenseRainDates();
+                } else {
+                  _intenseRainDates.clear();
+                }
+              });
+            },
           ),
           const SizedBox(width: 8),
           WeatherTag(
@@ -365,12 +394,10 @@ class _HomeState extends State<Home> {
       ),
       calendarBuilders: CalendarBuilders(
         markerBuilder: (context, day, events) {
-          // Comparar solo la parte de la fecha (sin la hora)
           bool isSameDay(DateTime a, DateTime b) {
             return a.year == b.year && a.month == b.month && a.day == b.day;
           }
 
-          // Días con helada
           if (_frostDates.any((frostDate) => isSameDay(frostDate, day))) {
             return Container(
               width: 40,
@@ -385,7 +412,6 @@ class _HomeState extends State<Home> {
             );
           }
 
-          // Días con sequía
           if (_droughtDates.any((droughtDate) => isSameDay(droughtDate, day))) {
             return Container(
               width: 40,
@@ -400,7 +426,6 @@ class _HomeState extends State<Home> {
             );
           }
 
-          // Días con vientos fuertes
           if (_strongWindDates
               .any((strongWindDate) => isSameDay(strongWindDate, day))) {
             return Container(
@@ -416,6 +441,20 @@ class _HomeState extends State<Home> {
             );
           }
 
+          if (_intenseRainDates
+              .any((intenseRainDate) => isSameDay(intenseRainDate, day))) {
+            return Container(
+              width: 40,
+              height: 50,
+              decoration: const BoxDecoration(
+                color: Colors.transparent,
+                shape: BoxShape.circle,
+                border: Border.fromBorderSide(
+                  BorderSide(color: AppTheme.intenseRainColorStroke, width: 1),
+                ),
+              ),
+            );
+          }
           return null;
         },
       ),

@@ -7,7 +7,7 @@ class MeteomaticsService {
   final String password = 'l30wgOLbW7';
 
   Future<List<DateTime>> fetchFrostDates(double lat, double lng) async {
-    String rangeDates = '2022-01-01T00:00:00Z--2026-12-31T00:00:00Z';
+    String rangeDates = '2023-01-01T00:00:00Z--2026-12-31T00:00:00Z';
     final String apiUrl =
         '$baseUrl$rangeDates:PT24H/frost_warning_24h:idx/$lat,$lng/json';
 
@@ -35,7 +35,7 @@ class MeteomaticsService {
   }
 
   Future<List<DateTime>> fetchDroughtDates(double lat, double lng) async {
-    String rangeDates = '2022-01-01T00:00:00Z--2024-10-10T00:00:00Z';
+    String rangeDates = '2023-01-01T00:00:00Z--2024-10-10T00:00:00Z';
     final String apiUrl =
         '$baseUrl$rangeDates:PT24H/drought_index:idx/$lat,$lng/json';
 
@@ -88,12 +88,42 @@ class MeteomaticsService {
           strongWindDates.add(date);
         }
       }
-      print('Url: $apiUrl');
-      print('List: $strongWindDates');
       return strongWindDates;
     } else {
       print('Url: $apiUrl');
       throw Exception('Error al obtener datos de vientos fuertes');
+    }
+  }
+
+  Future<List<DateTime>> fetchHeavyRainDates(double lat, double lng) async {
+    String rangeDates = '2024-09-04T00:00:00Z--2024-09-05T00:00:00Z';
+    final String apiUrl =
+        '$baseUrl$rangeDates:PT6H/heavy_rain_warning_6h:idx,precip_6h:mm/$lat,$lng/json';
+
+    final response = await http.get(Uri.parse(apiUrl), headers: {
+      'Authorization':
+          'Basic ${base64Encode(utf8.encode('$username:$password'))}',
+    });
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+      List<DateTime> heavyRainDates = [];
+
+      final precipData = jsonData['data'][1]['coordinates'][0]['dates'];
+      for (var dateEntry in precipData) {
+        double value = (dateEntry['value'] as num).toDouble();
+
+        // Get dates filter by (precipitation >= 20 mm)
+        if (value > 20.0) {
+          DateTime date = DateTime.parse(dateEntry['date']);
+          heavyRainDates.add(date);
+        }
+      }
+
+      return heavyRainDates;
+    } else {
+      print('Url: $apiUrl');
+      throw Exception('Error al obtener datos de lluvias intensas');
     }
   }
 }
