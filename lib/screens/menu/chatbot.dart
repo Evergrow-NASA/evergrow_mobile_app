@@ -18,7 +18,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
-  bool _isVoiceRecording = false; 
+  bool _isVoiceRecording = false;
   bool _hasText = false; // Se actualiza a 'false' inicialmente
 
   final ChatbotService _chatbotService = ChatbotService();
@@ -27,7 +27,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-    
+
     // Escuchar cambios en el controlador de texto para actualizar _hasText
     _controller.addListener(() {
       setState(() {
@@ -80,13 +80,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           MessageInput(
             controller: _controller,
             hasText: _hasText,
-            isVoiceRecording: _isVoiceRecording,
             onSend: _sendMessage,
-            onToggleRecording: () {
-              setState(() {
-                _isVoiceRecording = !_isVoiceRecording;
-              });
-            },
+            onToggleRecording: _toggleVoiceRecording,
           ),
         ],
       ),
@@ -123,7 +118,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     if (mounted) {
       _addMessageToList(response);
     }
-    
+
     // Limpiar el campo de texto después de enviar
     _controller.clear();
   }
@@ -153,6 +148,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
           curve: Curves.easeOut,
         );
       }
+    });
+  }
+
+  void _toggleVoiceRecording() {
+    setState(() {
+      _isVoiceRecording = !_isVoiceRecording;
     });
   }
 }
