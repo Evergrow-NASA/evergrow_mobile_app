@@ -7,10 +7,10 @@ import 'package:evergrow_mobile_app/constants.dart';
 import 'package:evergrow_mobile_app/screens/menu/home.dart';
 import 'package:geocoder2/geocoder2.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
 import 'dart:convert';
 import 'package:location/location.dart' as loc;
 import 'package:http/http.dart' as http;
+import 'package:geolocator/geolocator.dart';
 
 class SelectLocation extends StatefulWidget {
   const SelectLocation({super.key});
@@ -24,7 +24,8 @@ class _SelectLocationState extends State<SelectLocation> {
   final TextEditingController _searchController = TextEditingController();
 
   LatLng? destLocation = const LatLng(40.7128, -74.0060);
-  Location location = Location();
+  Position? destLocationUser;
+  loc.Location location = loc.Location();
   loc.LocationData? _currentPosition;
   final Completer<GoogleMapController?> _controller = Completer();
   String? _address;
@@ -34,12 +35,18 @@ class _SelectLocationState extends State<SelectLocation> {
   @override
   void initState() {
     super.initState();
+    _initializeLocation();
     getCurrentLocation();
 
     _searchController.addListener(() {
       if (_searchController.text.isNotEmpty && !_updatingFromMap) {
         setState(() {
-          _showLocationPredictions = true;
+          if (destLocation ==
+              LatLng(destLocationUser!.latitude, destLocationUser!.longitude)) {
+            _showLocationPredictions = false;
+          } else {
+            _showLocationPredictions = true;
+          }
         });
       } else {
         setState(() {
@@ -48,6 +55,28 @@ class _SelectLocationState extends State<SelectLocation> {
       }
       placeAutoComplete(_searchController.text);
     });
+  }
+
+  Future<void> _initializeLocation() async {
+    try {
+      Position position = await Geolocator.getCurrentPosition();
+
+      setState(() {
+        destLocationUser = position;
+        destLocation =
+            LatLng(destLocationUser!.latitude, destLocationUser!.longitude);
+      });
+
+      final GoogleMapController? controller = await _controller.future;
+      if (controller != null) {
+        controller.animateCamera(CameraUpdate.newLatLng(destLocation!));
+      }
+
+      getAddressFromLatLng();
+      print('Address: $destLocation');
+    } catch (e) {
+      print('Error al obtener la ubicación: $e');
+    }
   }
 
   void placeAutoComplete(String text) async {
@@ -112,9 +141,11 @@ class _SelectLocationState extends State<SelectLocation> {
   getAddressFromLatLng() async {
     try {
       GeoData data = await Geocoder2.getDataFromCoordinates(
-          latitude: destLocation!.latitude,
-          longitude: destLocation!.longitude,
-          googleMapApiKey: apiKey);
+        latitude: destLocation!.latitude,
+        longitude: destLocation!.longitude,
+        googleMapApiKey: apiKey,
+      );
+
       setState(() {
         _address = formatAddress(data.address);
       });
@@ -125,7 +156,7 @@ class _SelectLocationState extends State<SelectLocation> {
 
   getCurrentLocation() async {
     bool serviceEnabled;
-    PermissionStatus permissionGranted;
+    loc.PermissionStatus permissionGranted;
 
     serviceEnabled = await location.serviceEnabled();
     final GoogleMapController? controller = await _controller.future;
@@ -138,9 +169,9 @@ class _SelectLocationState extends State<SelectLocation> {
     }
 
     permissionGranted = await location.hasPermission();
-    if (permissionGranted == PermissionStatus.denied) {
+    if (permissionGranted == loc.PermissionStatus.denied) {
       permissionGranted = await location.requestPermission();
-      if (permissionGranted != PermissionStatus.granted) {
+      if (permissionGranted != loc.PermissionStatus.granted) {
         return;
       }
     }
@@ -315,11 +346,8 @@ class _SelectLocationState extends State<SelectLocation> {
           press: () {
             setState(() {
               _searchController.text = predictions[index].description!;
-              _showLocationPredictions =
-                  false; // Ocultar las predicciones después de seleccionar
+              _showLocationPredictions = false;
             });
-
-            // Luego obtenemos más detalles sobre la ubicación seleccionada
             _selectLocation(predictions[index].placeId!);
           },
         );
