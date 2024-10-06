@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:evergrow_mobile_app/models/temperature.dart';
 import 'package:evergrow_mobile_app/screens/menu/chatbot.dart';
 import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
@@ -30,27 +32,22 @@ class _HomeState extends State<Home> {
   bool _isLoading = true;
 
   List<DateTime> _frostDates = [];
-  bool _isFrostSelected = false;
+  bool _isFrostSelected = true;
   List<DateTime> _droughtDates = [];
-  bool _isDroughtSelected = false;
+  bool _isDroughtSelected = true;
   List<DateTime> _strongWindDates = [];
-  bool _isStrongWindsSelected = false;
+  bool _isStrongWindsSelected = true;
   List<DateTime> _intenseRainDates = [];
-  bool _isIntenseRainSelected = false;
+  bool _isIntenseRainSelected = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchAllWeatherData();
-  }
-
-  Future<void> _fetchAllWeatherData() async {
-    await Future.wait([
-      _fetchDroughtDates(),
-      _fetchFrostDates(),
-      _fetchIntenseRainDates(),
-      _fetchStrongWindDates(),
-    ]);
+    _fetchWeatherData();
+    _fetchDroughtDates();
+    _fetchFrostDates();
+    _fetchIntenseRainDates();
+    _fetchStrongWindDates();
   }
 
   Future<void> _fetchWeatherData() async {
@@ -76,6 +73,7 @@ class _HomeState extends State<Home> {
     try {
       List<DateTime> frostDates =
           await meteomaticsService.fetchFrostDates(widget.lat, widget.lng);
+
       setState(() {
         _frostDates = frostDates;
         _isLoading = false;
@@ -93,10 +91,18 @@ class _HomeState extends State<Home> {
     try {
       List<DateTime> droughtDates =
           await meteomaticsService.fetchDroughtDates(widget.lat, widget.lng);
-      setState(() {
-        _droughtDates = droughtDates;
-      });
+      if (mounted) {
+        setState(() {
+          _droughtDates = droughtDates;
+          _isLoading = false;
+        });
+      }
     } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
       print('Error al obtener las fechas de sequía: $e');
     }
   }
@@ -289,49 +295,33 @@ class _HomeState extends State<Home> {
       child: Row(
         children: [
           WeatherTag(
-            label: 'Drought',
-            colorFill: _isDroughtSelected
-                ? AppTheme.droughtColorFill
-                : Colors.transparent,
-            colorStroke: AppTheme.droughtColorStroke,
-            imagePath: 'assets/icons/drought.png',
-            fetchDates: () {
-              // Cambiar el estado de la UI de inmediato
-              setState(() {
-                _isDroughtSelected = !_isDroughtSelected;
-                if (!_isDroughtSelected) {
-                  _droughtDates.clear();
-                }
-              });
-
-              if (_isDroughtSelected) {
-                _fetchDroughtDates().then((_) {
-                  setState(() {});
+              label: 'Drought',
+              colorFill: _isDroughtSelected
+                  ? Colors.transparent
+                  : AppTheme.droughtColorFill,
+              colorStroke: _isDroughtSelected
+                  ? Colors.transparent
+                  : AppTheme.droughtColorStroke,
+              imagePath: 'assets/icons/drought.png',
+              fetchDates: () {
+                setState(() {
+                  _isDroughtSelected = !_isDroughtSelected;
                 });
-              }
-            },
-          ),
+              }),
           const SizedBox(width: 8),
           WeatherTag(
             label: 'Intense rain',
             colorFill: _isIntenseRainSelected
                 ? AppTheme.intenseRainColorFill
                 : Colors.transparent,
-            colorStroke: AppTheme.intenseRainColorStroke,
+            colorStroke: _isIntenseRainSelected
+                ? AppTheme.intenseRainColorStroke
+                : Colors.transparent,
             imagePath: 'assets/icons/intense_rain.png',
             fetchDates: () {
               setState(() {
                 _isIntenseRainSelected = !_isIntenseRainSelected;
-                if (!_isIntenseRainSelected) {
-                  _intenseRainDates.clear();
-                }
               });
-
-              if (_isIntenseRainSelected) {
-                _fetchIntenseRainDates().then((_) {
-                  setState(() {});
-                });
-              }
             },
           ),
           const SizedBox(width: 8),
@@ -339,21 +329,14 @@ class _HomeState extends State<Home> {
             label: 'Frost',
             colorFill:
                 _isFrostSelected ? AppTheme.frostColorFill : Colors.transparent,
-            colorStroke: AppTheme.frostColorStroke,
+            colorStroke: _isFrostSelected
+                ? AppTheme.frostColorStroke
+                : Colors.transparent,
             imagePath: 'assets/icons/frost.png',
             fetchDates: () {
               setState(() {
                 _isFrostSelected = !_isFrostSelected;
-                if (!_isFrostSelected) {
-                  _frostDates.clear();
-                }
               });
-
-              if (_isFrostSelected) {
-                _fetchFrostDates().then((_) {
-                  setState(() {});
-                });
-              }
             },
           ),
           const SizedBox(width: 8),
@@ -362,21 +345,14 @@ class _HomeState extends State<Home> {
             colorFill: _isStrongWindsSelected
                 ? AppTheme.strongWindsColorFill
                 : Colors.transparent,
-            colorStroke: AppTheme.strongWindsColorStroke,
+            colorStroke: _isStrongWindsSelected
+                ? AppTheme.strongWindsColorStroke
+                : Colors.transparent,
             imagePath: 'assets/icons/strong_winds.png',
             fetchDates: () {
               setState(() {
                 _isStrongWindsSelected = !_isStrongWindsSelected;
-                if (!_isStrongWindsSelected) {
-                  _strongWindDates.clear();
-                }
               });
-
-              if (_isStrongWindsSelected) {
-                _fetchStrongWindDates().then((_) {
-                  setState(() {});
-                });
-              }
             },
           ),
         ],
@@ -432,7 +408,7 @@ class _HomeState extends State<Home> {
             );
           }
 
-          if (_isDroughtSelected &&
+          if (_isDroughtSelected == false &&
               _droughtDates.any((droughtDate) => isSameDay(droughtDate, day))) {
             return Container(
               width: 40,
