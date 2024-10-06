@@ -1,3 +1,4 @@
+import 'package:evergrow_mobile_app/screens/menu/details_day.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../utils/theme.dart';
@@ -37,7 +38,32 @@ class WeatherCalendar extends StatelessWidget {
       selectedDayPredicate: (day) {
         return isSameDay(selectedDay, day);
       },
-      onDaySelected: onDaySelected,
+      onDaySelected: (selectedDay, focusedDay) {
+        bool isDrought = droughtDates
+            .any((droughtDate) => isSameDay(droughtDate, selectedDay));
+        bool isFrost =
+            frostDates.any((frostDate) => isSameDay(frostDate, selectedDay));
+        bool isStrongWind = strongWindDates
+            .any((strongWindDate) => isSameDay(strongWindDate, selectedDay));
+        bool isIntenseRain = intenseRainDates
+            .any((intenseRainDate) => isSameDay(intenseRainDate, selectedDay));
+
+        if (isDrought || isFrost || isStrongWind || isIntenseRain) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DetailsDay(
+                selectedDay: selectedDay,
+                isDroughtSelected: isDrought,
+                isFrostSelected: isFrost,
+                isStrongWindsSelected: isStrongWind,
+                isIntenseRainSelected: isIntenseRain,
+              ),
+            ),
+          );
+        }
+        onDaySelected(selectedDay, focusedDay);
+      },
       calendarStyle: CalendarStyle(
         todayDecoration: const BoxDecoration(
           color: AppTheme.primaryColor,
