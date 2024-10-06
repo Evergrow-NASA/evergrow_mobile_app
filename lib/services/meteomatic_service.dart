@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 
 class MeteomaticsService {
   final String baseUrl = 'https://api.meteomatics.com/';
-  final String username = 'medalith_tatiana';
-  final String password = 'l30wgOLbW7';
+  final String username = 'upc_abigail_lucero';
+  final String password = '8EbL4AdTs0';
 
   Future<List<DateTime>> fetchFrostDates(double lat, double lng) async {
     String rangeDates = '2023-01-01T00:00:00Z--2026-12-31T00:00:00Z';
