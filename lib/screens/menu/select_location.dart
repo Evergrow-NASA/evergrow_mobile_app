@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 import 'package:evergrow_mobile_app/models/autocomplete_prediction.dart';
 import 'package:evergrow_mobile_app/services/map_service.dart';
@@ -374,6 +376,22 @@ class _SelectLocationState extends State<SelectLocation> {
           }
         },
         controller: _searchController,
+        onFieldSubmitted: (value) async {
+          if (predictions.isNotEmpty) {
+            String placeId = predictions.first.placeId!;
+            await _selectLocation(placeId);
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                builder: (context) => Home(
+                  destLocation!.latitude,
+                  destLocation!.longitude,
+                  _address ?? 'Unknown Location',
+                ),
+              ),
+              (route) => false,
+            );
+          }
+        },
         decoration: InputDecoration(
           filled: true,
           fillColor: secondary3,
