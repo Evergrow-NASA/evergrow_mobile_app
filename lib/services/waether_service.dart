@@ -221,4 +221,42 @@ class WeatherService {
     }
     return 0;
   }
+
+  //Metodo para obtener la velocidad del viento promedio en base a 1 dia en especifico como parametro
+  Future<double> fetchAverageWindSpeed(
+      double latitude, double longitude, String date) async {
+    String startDate = '${date}T00:00:00Z';
+    String endDate = '${date}T23:59:59Z';
+
+    final String apiUrl =
+        '$baseUrl/$startDate--$endDate:PT1H/wind_speed_10m:kmh/$latitude,$longitude/json';
+
+    final response = await http.get(Uri.parse(apiUrl), headers: {
+      'Authorization':
+          'Basic ${base64Encode(utf8.encode('$username:$password'))}',
+    });
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+
+      if (jsonData['data'][0]['coordinates'][0]['dates'] != null) {
+        List<dynamic> dateEntries =
+            jsonData['data'][0]['coordinates'][0]['dates'];
+
+        double sum = 0;
+        int count = 0;
+
+        for (var entry in dateEntries) {
+          sum += entry['value'].toDouble();
+          count++;
+        }
+
+        return sum / count;
+      } else {
+        throw Exception(
+            'No se encontraron datos de velocidad del viento para las fechas seleccionadas.');
+      }
+    }
+    return 0;
+  }
 }

@@ -4,7 +4,7 @@ import 'package:evergrow_mobile_app/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../components/top_section.dart';
-import 'package:evergrow_mobile_app/services/waether_service.dart'; // Import correcto
+import 'package:evergrow_mobile_app/services/waether_service.dart';
 
 class DetailsDay extends StatefulWidget {
   final DateTime selectedDay;
@@ -62,6 +62,7 @@ class _DetailsDayState extends State<DetailsDay> {
   late DateTime _selectedNewDay;
   late CalendarFormat _calendarFormat;
   double? averageTemperature;
+  double? averageWindSpeed;
 
   bool isDrought = false;
   bool isRain = false;
@@ -76,6 +77,7 @@ class _DetailsDayState extends State<DetailsDay> {
     _selectedNewDay = widget.selectedDay;
     _updateRecommendations(widget.selectedDay);
     _fetchTemperatureForSelectedDay(_selectedNewDay);
+    _fetchWindVelocityForSelectedDay(_selectedNewDay);
   }
 
   Future<void> _fetchTemperatureForSelectedDay(DateTime selectedDay) async {
@@ -94,7 +96,27 @@ class _DetailsDayState extends State<DetailsDay> {
         averageTemperature = temperature;
       });
     } catch (error) {
-      print('Error fetching temperature: $error');
+      print('Error: $error');
+    }
+  }
+
+  Future<void> _fetchWindVelocityForSelectedDay(DateTime selectedDay) async {
+    WeatherService weatherService = WeatherService();
+    try {
+      String formattedDate =
+          '${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}';
+
+      double windVelocity = await weatherService.fetchAverageWindSpeed(
+        widget.latitude,
+        widget.longitude,
+        formattedDate,
+      );
+
+      setState(() {
+        averageWindSpeed = windVelocity;
+      });
+    } catch (error) {
+      print('Error fetching wind velocity: $error');
     }
   }
 
@@ -132,8 +154,21 @@ class _DetailsDayState extends State<DetailsDay> {
                     const SizedBox(height: 20),
                     _buildRecommendations(isDrought, isRain, isFrost, isWind),
                     const SizedBox(height: 20),
-                    _buildTemperatureInfo(
-                        'assets/icons/strong_winds.png', 'Hot day'),
+                    _buildCriteriaInfo(
+                      'assets/icons/strong_winds.png',
+                      'Hot day',
+                      averageTemperature != null
+                          ? 'The average temperature will be ${averageTemperature!.toStringAsFixed(2)} °C'
+                          : 'Temperature data not available yet',
+                    ),
+                    const SizedBox(height: 20),
+                    _buildCriteriaInfo(
+                      'assets/icons/strong_winds.png',
+                      'Light winds',
+                      averageWindSpeed != null
+                          ? 'The average wind speed for the day will be ${averageWindSpeed!.toStringAsFixed(2)} km/h'
+                          : 'Wind speed data not available yet',
+                    ),
                   ],
                 ),
               ),
@@ -144,54 +179,51 @@ class _DetailsDayState extends State<DetailsDay> {
     );
   }
 
-  Widget _buildTemperatureInfo(String imagePath, String title) {
-    if (averageTemperature == null) {
-      return const Text('Loading temperature...');
-    } else {
-      return Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(width: 20),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Image.asset(
-                      imagePath,
-                      width: 20,
-                      height: 20,
-                      color: neutral,
-                    ),
-                    const SizedBox(width: 5),
-                    Expanded(
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: neutral,
-                        ),
-                        overflow: TextOverflow.visible,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  'The average temperature will be ${averageTemperature!.toStringAsFixed(2)} °C',
-                  style: const TextStyle(
-                    fontSize: 14,
+  Widget _buildCriteriaInfo(
+      String imagePath, String title, String description) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SizedBox(width: 20),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Image.asset(
+                    imagePath,
+                    width: 20,
+                    height: 20,
                     color: neutral,
                   ),
+                  const SizedBox(width: 5),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: neutral,
+                      ),
+                      overflow: TextOverflow.visible,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: neutral,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
-      );
-    }
+        ),
+      ],
+    );
   }
 
   Widget _buildWeatherHeader() {
