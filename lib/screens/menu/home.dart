@@ -1,4 +1,4 @@
-import 'package:evergrow_mobile_app/models/temperature_data.dart';
+import 'package:evergrow_mobile_app/models/temperature.dart';
 import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
 import 'package:evergrow_mobile_app/services/meteomatic_service.dart';
 import 'package:evergrow_mobile_app/services/waether_service.dart';
@@ -231,7 +231,7 @@ class _HomeState extends State<Home> {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: _weatherData.map((data) {
-          String hour = _extractHour(data.date);
+          String hour = _extractHour(data.time);
           IconData weatherIcon = _getWeatherIcon(data.temperature);
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -246,16 +246,17 @@ class _HomeState extends State<Home> {
     );
   }
 
-  String _extractHour(String dateTimeKey) {
-    String hour = dateTimeKey.substring(8);
-    int hourInt = int.parse(hour);
-    String period = hourInt >= 12 ? 'PM' : 'AM';
+  String _extractHour(String time) {
+    int hourInt = int.parse(time.split(':')[0]);
+    String period = hourInt >= 12 ? 'p.m.' : 'a.m.';
+
     hourInt = hourInt > 12
         ? hourInt - 12
         : hourInt == 0
             ? 12
             : hourInt;
-    return '$hourInt:00 $period';
+
+    return '$hourInt $period';
   }
 
   IconData _getWeatherIcon(double temperature) {
@@ -455,6 +456,7 @@ class _HomeState extends State<Home> {
               ),
             );
           }
+
           return null;
         },
       ),
