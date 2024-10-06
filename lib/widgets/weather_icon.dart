@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:math' as math;
 import '../../utils/theme.dart';
 
@@ -25,18 +26,19 @@ class WeatherIcon extends StatelessWidget {
     } else {
       if (iconData == Icons.wb_sunny) {
         double temperature = double.parse(value.replaceAll('°C', ''));
-        
 
         if (temperature < 10) {
-          weatherIcon = Icons.ac_unit;
-        } else if (temperature < 20) {
-          weatherIcon = Icons.cloud;
-        } else if (temperature < 30) {
-          weatherIcon = Icons.wb_cloudy;
-        } else if (temperature < 40) {
-          weatherIcon = Icons.wb_sunny;
-        } else {
-          weatherIcon = Icons.wb_incandescent;
+          weatherIcon = FontAwesomeIcons.snowflake;
+        } else if (temperature >= 10 && temperature < 15) {
+          weatherIcon = FontAwesomeIcons.temperatureLow;
+        } else if (temperature >= 15 && temperature < 20) {
+          weatherIcon = FontAwesomeIcons.cloud;
+        } else if (temperature >= 20 && temperature < 25) {
+          weatherIcon = FontAwesomeIcons.cloudSun;
+        } else if (temperature >= 25 && temperature < 30) {
+          weatherIcon = FontAwesomeIcons.sun;
+        } else if (temperature >= 30) {
+          weatherIcon = FontAwesomeIcons.temperatureHigh;
         }
       }
 
@@ -64,8 +66,7 @@ class WeatherIcon extends StatelessWidget {
     }
   }
 
-  
-  Widget _ishumidity(String value, IconData weatherIcon, String time ){
+  Widget _ishumidity(String value, IconData weatherIcon, String time) {
     double moisturePercentage = double.parse(value.replaceAll('%', '')) / 100.0;
     return Column(
       children: [
@@ -105,11 +106,7 @@ class WeatherIcon extends StatelessWidget {
       ],
     );
   }
-
-
- 
 }
-
 
 class _MoistureClipper extends CustomClipper<Rect> {
   final double percentage;
@@ -126,4 +123,4 @@ class _MoistureClipper extends CustomClipper<Rect> {
   bool shouldReclip(covariant CustomClipper<Rect> oldClipper) {
     return true;
   }
-} 
+}

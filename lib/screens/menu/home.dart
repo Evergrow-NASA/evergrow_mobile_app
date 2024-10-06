@@ -253,7 +253,7 @@ class _HomeState extends State<Home> {
                   ExpandableWeatherSection(
                     title: 'Wind',
                     message: _windMessage,
-                    iconData: Icons.air,
+                    iconData: Icons.arrow_right_alt,
                     data: _windData,
                     times: _windTimes,
                     directions: _windDirections,
