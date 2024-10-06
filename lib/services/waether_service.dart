@@ -259,4 +259,43 @@ class WeatherService {
     }
     return 0;
   }
+
+  //Metodo para obtener la humedad del suelo promedio en base a 1 dia en especifico como parametro
+  Future<double> fetchAverageMoisture(
+      double latitude, double longitude, String date) async {
+    String startDate = '${date}T00:00:00Z';
+    String endDate = '${date}T23:59:59Z';
+
+    final String apiUrl =
+        '$baseUrl/$startDate--$endDate:PT1H/soil_moisture_index_-5cm:idx,soil_moisture_index_-15cm:idx,soil_moisture_index_-50cm:idx,soil_moisture_index_-150cm:idx/$latitude,$longitude/json';
+
+    final response = await http.get(Uri.parse(apiUrl), headers: {
+      'Authorization':
+          'Basic ${base64Encode(utf8.encode('$username:$password'))}',
+    });
+
+    if (response.statusCode == 200) {
+      final jsonData = json.decode(response.body);
+
+      if (jsonData['data'][0]['coordinates'][0]['dates'] != null) {
+        List<dynamic> dateEntries =
+            jsonData['data'][0]['coordinates'][0]['dates'];
+
+        double sum = 0;
+        int count = 0;
+
+        for (var entry in dateEntries) {
+          sum += entry['value'].toDouble() * 100;
+          count++;
+        }
+
+        print('Api url: $apiUrl');
+        return sum / count;
+      } else {
+        throw Exception(
+            'No se encontraron datos de humedad del suelo para las fechas seleccionadas.');
+      }
+    }
+    return 0;
+  }
 }

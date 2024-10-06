@@ -63,6 +63,7 @@ class _DetailsDayState extends State<DetailsDay> {
   late CalendarFormat _calendarFormat;
   double? averageTemperature;
   double? averageWindSpeed;
+  double? averageMoisture;
 
   bool isDrought = false;
   bool isRain = false;
@@ -78,6 +79,7 @@ class _DetailsDayState extends State<DetailsDay> {
     _updateRecommendations(widget.selectedDay);
     _fetchTemperatureForSelectedDay(_selectedNewDay);
     _fetchWindVelocityForSelectedDay(_selectedNewDay);
+    _fetchMoistureForSelectedDay(_selectedNewDay);
   }
 
   Future<void> _fetchTemperatureForSelectedDay(DateTime selectedDay) async {
@@ -117,6 +119,23 @@ class _DetailsDayState extends State<DetailsDay> {
       });
     } catch (error) {
       print('Error fetching wind velocity: $error');
+    }
+  }
+
+  Future<void> _fetchMoistureForSelectedDay(DateTime selectedDay) async {
+    WeatherService weatherService = WeatherService();
+    try {
+      String formattedDate =
+          '${selectedDay.year}-${selectedDay.month.toString().padLeft(2, '0')}-${selectedDay.day.toString().padLeft(2, '0')}';
+
+      double moisture = await weatherService.fetchAverageMoisture(
+          widget.latitude, widget.longitude, formattedDate);
+
+      setState(() {
+        averageMoisture = moisture;
+      });
+    } catch (error) {
+      print('Error fetching moisture: $error');
     }
   }
 
@@ -169,6 +188,15 @@ class _DetailsDayState extends State<DetailsDay> {
                           ? 'The average wind speed for the day will be ${averageWindSpeed!.toStringAsFixed(2)} km/h'
                           : 'Wind speed data not available yet',
                     ),
+                    const SizedBox(height: 20),
+                    _buildCriteriaInfo(
+                      'assets/icons/strong_winds.png',
+                      'Well-Moistened',
+                      averageMoisture != null
+                          ? 'The soil is expected to be healthy with a moisture level of ${averageMoisture!.toStringAsFixed(2)}%'
+                          : 'Moisture data not available yet',
+                    ),
+                    const SizedBox(height: 20),
                   ],
                 ),
               ),
