@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 import '../constants.dart';
 
@@ -19,11 +18,8 @@ class LocationListTile extends StatelessWidget {
       children: [
         ListTile(
           onTap: press,
-          horizontalTitleGap:
-              0, 
-          contentPadding:
-              EdgeInsets.zero, 
-          leading: SvgPicture.asset("assets/moisture_icon.svg"),
+          horizontalTitleGap: 0,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 20),
           title: Text(
             location,
             maxLines: 2,
