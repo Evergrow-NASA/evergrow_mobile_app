@@ -109,19 +109,34 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _sendMessage(String message) async {
-    if (!mounted) return;
+  if (!mounted) return;
 
-    _addMessageToList(message);
+  _addMessageToList(message);
 
-    final response = await _chatbotService.sendMessage(message);
+  const String userId = '12345';
+  const String name = 'John Doe';
+  const String locationChoice = 'current';
+  const String city = 'New York';
+  const double lat = 40.7128;
+  const double lon = -74.0060;
 
-    if (mounted) {
-      _addMessageToList(response);
-    }
+  final response = await _chatbotService.sendChatbotRequest(
+    userId: userId,
+    question: message,
+    name: name,
+    locationChoice: locationChoice,
+    city: city,
+    lat: lat,
+    lon: lon,
+  );
 
-    // Limpiar el campo de texto después de enviar
-    _controller.clear();
+  if (mounted) {
+    _addMessageToList(response);
   }
+
+  _controller.clear();
+}
+
 
   void _addMessageToList(String message) {
     setState(() {
