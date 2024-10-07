@@ -4,7 +4,8 @@ import 'package:evergrow_mobile_app/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../components/top_section.dart';
-import 'package:evergrow_mobile_app/services/waether_service.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../services/waether_service.dart';
 
 class DetailsDay extends StatefulWidget {
   final DateTime selectedDay;
@@ -174,7 +175,7 @@ class _DetailsDayState extends State<DetailsDay> {
                     _buildRecommendations(isDrought, isRain, isFrost, isWind),
                     const SizedBox(height: 20),
                     _buildCriteriaInfo(
-                      'assets/icons/strong_winds.png',
+                      FontAwesomeIcons.thermometerHalf,
                       'Hot day',
                       averageTemperature != null
                           ? 'The average temperature will be ${averageTemperature!.toStringAsFixed(2)} °C'
@@ -182,7 +183,7 @@ class _DetailsDayState extends State<DetailsDay> {
                     ),
                     const SizedBox(height: 20),
                     _buildCriteriaInfo(
-                      'assets/icons/strong_winds.png',
+                      FontAwesomeIcons.wind,
                       'Light winds',
                       averageWindSpeed != null
                           ? 'The average wind speed for the day will be ${averageWindSpeed!.toStringAsFixed(2)} km/h'
@@ -190,7 +191,7 @@ class _DetailsDayState extends State<DetailsDay> {
                     ),
                     const SizedBox(height: 20),
                     _buildCriteriaInfo(
-                      'assets/icons/strong_winds.png',
+                      FontAwesomeIcons.water,
                       'Well-Moistened',
                       averageMoisture != null
                           ? 'The soil is expected to be healthy with a moisture level of ${averageMoisture!.toStringAsFixed(2)}%'
@@ -208,7 +209,7 @@ class _DetailsDayState extends State<DetailsDay> {
   }
 
   Widget _buildCriteriaInfo(
-      String imagePath, String title, String description) {
+      IconData iconData, String title, String description) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -219,10 +220,9 @@ class _DetailsDayState extends State<DetailsDay> {
             children: [
               Row(
                 children: [
-                  Image.asset(
-                    imagePath,
-                    width: 20,
-                    height: 20,
+                  FaIcon(
+                    iconData,
+                    size: 20,
                     color: neutral,
                   ),
                   const SizedBox(width: 5),
@@ -323,7 +323,7 @@ class _DetailsDayState extends State<DetailsDay> {
       children: [
         if (isDrought)
           _buildRecommendation(
-            recommendations[0].imagePath,
+            FontAwesomeIcons.water,
             recommendations[0].title,
             recommendations[0].description,
             const Color.fromARGB(255, 227, 130, 78),
@@ -331,7 +331,7 @@ class _DetailsDayState extends State<DetailsDay> {
         const SizedBox(height: 10),
         if (isRain)
           _buildRecommendation(
-            recommendations[1].imagePath,
+            FontAwesomeIcons.cloudRain,
             recommendations[1].title,
             recommendations[1].description,
             const Color.fromARGB(255, 50, 159, 199),
@@ -339,14 +339,14 @@ class _DetailsDayState extends State<DetailsDay> {
         const SizedBox(height: 10),
         if (isFrost)
           _buildRecommendation(
-            recommendations[2].imagePath,
+            FontAwesomeIcons.snowflake,
             recommendations[2].title,
             recommendations[2].description,
             const Color.fromARGB(255, 113, 142, 151),
           ),
         if (isWind)
           _buildRecommendation(
-            recommendations[3].imagePath,
+            FontAwesomeIcons.wind,
             recommendations[3].title,
             recommendations[3].description,
             const Color.fromARGB(255, 119, 101, 101),
@@ -357,7 +357,7 @@ class _DetailsDayState extends State<DetailsDay> {
 
   // Mostrar una recomendación
   Widget _buildRecommendation(
-      String imagePath, String title, String description, Color color) {
+      IconData iconData, String title, String description, Color color) {
     return Container(
       padding: const EdgeInsets.all(10),
       child: Row(
@@ -370,10 +370,9 @@ class _DetailsDayState extends State<DetailsDay> {
               children: [
                 Row(
                   children: [
-                    Image.asset(
-                      imagePath,
-                      width: 20,
-                      height: 20,
+                    FaIcon(
+                      iconData,
+                      size: 20,
                       color: color,
                     ),
                     const SizedBox(width: 5),
