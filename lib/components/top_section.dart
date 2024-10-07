@@ -1,8 +1,13 @@
+import 'package:evergrow_mobile_app/screens/settings/settings.dart';
 import 'package:flutter/material.dart';
 import '../utils/theme.dart';
 
 class TopSection extends StatelessWidget {
-  const TopSection({super.key});
+  final String? location;
+  final double? latitude;
+  final double? longitude;
+
+  const TopSection({super.key, this.location, this.latitude, this.longitude});
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +54,16 @@ class TopSection extends StatelessWidget {
             right: 20,
             child: GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/settings');
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(
+                      location: location!,
+                      lat: latitude!,
+                      lng: longitude!,
+                    ),
+                  ),
+                );
               },
               child: const Icon(
                 Icons.settings,

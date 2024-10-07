@@ -1,9 +1,6 @@
 import 'package:evergrow_mobile_app/screens/menu/home.dart';
 import 'package:evergrow_mobile_app/screens/menu/select_location.dart';
 import 'package:evergrow_mobile_app/screens/menu/start_menu.dart';
-import 'package:evergrow_mobile_app/screens/settings/notifications_settings.dart';
-import 'package:evergrow_mobile_app/screens/settings/settings.dart';
-import 'package:evergrow_mobile_app/screens/settings/unit_of_measurement_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -38,20 +35,9 @@ class MyApp extends StatelessWidget {
             break;
           case '/home':
             final args = settings.arguments as Map<String, double>;
-            builder = (BuildContext context) => Home(args['latitude']!,
-                args['longitude']!, args['location'] as String);
+            builder = (BuildContext context) => Home(args['location'] as String,
+                args['latitude']!, args['longitude']!);
 
-            break;
-          case '/settings':
-            builder = (BuildContext context) => const SettingsPage();
-            break;
-          case '/notifications_settings':
-            builder =
-                (BuildContext context) => const NotificationsSettingsPage();
-            break;
-          case '/unit_of_measurement_settings':
-            builder =
-                (BuildContext context) => const UnitOfMeasurementSettingsPage();
             break;
           default:
             throw Exception('Invalid route: ${settings.name}');

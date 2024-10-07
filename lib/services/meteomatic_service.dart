@@ -7,7 +7,7 @@ class MeteomaticsService {
   final String password = '8EbL4AdTs0';
 
   Future<List<DateTime>> fetchFrostDates(double lat, double lng) async {
-    String rangeDates = '2023-01-01T00:00:00Z--2026-12-31T00:00:00Z';
+    String rangeDates = '2024-10-07T00:00:00Z--2026-10-01T00:00:00Z';
     final String apiUrl =
         '$baseUrl$rangeDates:PT24H/frost_warning_24h:idx/$lat,$lng/json';
 
@@ -35,7 +35,7 @@ class MeteomaticsService {
   }
 
   Future<List<DateTime>> fetchDroughtDates(double lat, double lng) async {
-    String rangeDates = '2023-01-01T00:00:00Z--2024-10-10T00:00:00Z';
+    String rangeDates = '2024-10-07T00:00:00Z--2024-10-10T00:00:00Z';
     final String apiUrl =
         '$baseUrl$rangeDates:PT24H/drought_index:idx/$lat,$lng/json';
 
@@ -65,7 +65,7 @@ class MeteomaticsService {
   }
 
   Future<List<DateTime>> fetchStrongWindDates(double lat, double lng) async {
-    String rangeDates = '2023-01-01T00:00:00Z--2025-12-30T00:00:00Z';
+    String rangeDates = '2024-10-07T00:00:00Z--2025-12-30T00:00:00Z';
     final String apiUrl =
         '$baseUrl$rangeDates:PT1H/wind_warning_1h:idx,wind_gusts_10m_1h:kmh/$lat,$lng/json';
 
@@ -96,7 +96,7 @@ class MeteomaticsService {
   }
 
   Future<List<DateTime>> fetchHeavyRainDates(double lat, double lng) async {
-    String rangeDates = '2024-09-04T00:00:00Z--2024-09-05T00:00:00Z';
+    String rangeDates = '2024-10-07T00:00:00Z--2025-12-05T00:00:00Z';
     final String apiUrl =
         '$baseUrl$rangeDates:PT6H/heavy_rain_warning_6h:idx,precip_6h:mm/$lat,$lng/json';
 

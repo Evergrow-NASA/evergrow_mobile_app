@@ -1,4 +1,7 @@
+import 'package:evergrow_mobile_app/screens/menu/home.dart';
+import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:evergrow_mobile_app/components/bottom_navigation.dart';
 import 'package:evergrow_mobile_app/components/top_section.dart';
 import 'package:evergrow_mobile_app/widgets/chat_bubble.dart';
 import 'package:evergrow_mobile_app/widgets/quick_options.dart';
@@ -7,7 +10,15 @@ import 'package:evergrow_mobile_app/services/chatbot_service.dart';
 import 'package:evergrow_mobile_app/widgets/message_input.dart';
 
 class ChatbotScreen extends StatefulWidget {
-  const ChatbotScreen({super.key});
+  final String location;
+  final double lat;
+  final double lng;
+
+  const ChatbotScreen(
+      {super.key,
+      required this.location,
+      required this.lat,
+      required this.lng});
 
   @override
   State<ChatbotScreen> createState() => _ChatbotScreenState();
@@ -19,16 +30,47 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   bool _isVoiceRecording = false;
-  bool _hasText = false; // Initially set to 'false'
+
+  bool _hasText = false;
 
   final ChatbotService _chatbotService = ChatbotService();
+
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatbotScreen(
+                location: widget.location, lat: widget.lat, lng: widget.lng)),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Home(widget.location, widget.lat, widget.lng),
+        ),
+      );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Notifications(
+                location: widget.location, lat: widget.lat, lng: widget.lng),
+          ));
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-    // Listen to text controller changes to update _hasText
     _controller.addListener(() {
       setState(() {
         _hasText = _controller.text.isNotEmpty;
@@ -70,7 +112,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          const TopSection(),
+          TopSection(
+              location: widget.location,
+              latitude: widget.lat,
+              longitude: widget.lng),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
             child: Center(
@@ -103,6 +148,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             hasText: _hasText,
             onSend: _sendMessage,
             onToggleRecording: _toggleVoiceRecording,
+          ),
+          BottomNavigation(
+            selectedIndex: _selectedIndex,
+            onItemTapped: _onItemTapped,
           ),
         ],
       ),

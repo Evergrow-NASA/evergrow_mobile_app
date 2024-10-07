@@ -12,6 +12,7 @@ class WeatherCalendar extends StatelessWidget {
   final List<DateTime> droughtDates;
   final List<DateTime> strongWindDates;
   final List<DateTime> intenseRainDates;
+  final String location;
   final double latitude;
   final double longitude;
   final Function(DateTime, DateTime) onDaySelected;
@@ -25,6 +26,7 @@ class WeatherCalendar extends StatelessWidget {
     required this.droughtDates,
     required this.strongWindDates,
     required this.intenseRainDates,
+    required this.location,
     required this.latitude,
     required this.longitude,
     required this.onDaySelected,
@@ -54,6 +56,7 @@ class WeatherCalendar extends StatelessWidget {
               droughtDates: droughtDates,
               strongWindDates: strongWindDates,
               intenseRainDates: intenseRainDates,
+              location: location,
               latitude: latitude,
               longitude: longitude,
             ),

@@ -1,9 +1,22 @@
+import 'package:evergrow_mobile_app/components/bottom_navigation.dart';
 import 'package:evergrow_mobile_app/components/top_section.dart';
+import 'package:evergrow_mobile_app/screens/menu/chatbot.dart';
+import 'package:evergrow_mobile_app/screens/menu/home.dart';
+import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
+import 'package:evergrow_mobile_app/screens/settings/settings.dart';
 import 'package:evergrow_mobile_app/utils/theme.dart';
 import 'package:flutter/material.dart';
 
 class UnitOfMeasurementSettingsPage extends StatefulWidget {
-  const UnitOfMeasurementSettingsPage({super.key});
+  final String location;
+  final double lat;
+  final double lng;
+
+  const UnitOfMeasurementSettingsPage(
+      {super.key,
+      required this.location,
+      required this.lat,
+      required this.lng});
 
   @override
   State<UnitOfMeasurementSettingsPage> createState() =>
@@ -12,6 +25,37 @@ class UnitOfMeasurementSettingsPage extends StatefulWidget {
 
 class _UnitOfMeasurementSettingsPageState
     extends State<UnitOfMeasurementSettingsPage> {
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatbotScreen(
+                location: widget.location, lat: widget.lat, lng: widget.lng)),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Home(widget.location, widget.lat, widget.lng),
+        ),
+      );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Notifications(
+                location: widget.location, lat: widget.lat, lng: widget.lng),
+          ));
+    }
+  }
+
   bool _isCelciusSelected = false;
   bool _isKilometersSelected = false;
 
@@ -20,7 +64,10 @@ class _UnitOfMeasurementSettingsPageState
     return Scaffold(
       body: Column(
         children: [
-          const TopSection(),
+          TopSection(
+              location: widget.location,
+              latitude: widget.lat,
+              longitude: widget.lng),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -34,17 +81,24 @@ class _UnitOfMeasurementSettingsPageState
                         IconButton(
                           icon: const Icon(Icons.arrow_back),
                           onPressed: () {
-                            Navigator.pop(context);
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => SettingsPage(
+                                      location: widget.location,
+                                      lat: widget.lat,
+                                      lng: widget.lng)),
+                            );
                           },
                         ),
                         const Text(
-                          'Unit of measurement settings',
+                          'Unit of measurement\nsettings',
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primaryColor,
                           ),
-                        ),
+                        )
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -138,6 +192,10 @@ class _UnitOfMeasurementSettingsPageState
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigation(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }
