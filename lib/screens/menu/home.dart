@@ -20,7 +20,7 @@ class Home extends StatefulWidget {
   final double lat;
   final double lng;
 
-  const Home(this.lat, this.lng, this.location, {super.key});
+  const Home(this.location, this.lat, this.lng, {super.key});
 
   @override
   State<Home> createState() => _HomeState();
@@ -196,27 +196,60 @@ class _HomeState extends State<Home> {
     setState(() {
       _selectedIndex = index;
     });
+
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatbotScreen(
+                location: widget.location, lat: widget.lat, lng: widget.lng)),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Home(widget.location, widget.lat, widget.lng),
+        ),
+      );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Notifications(
+                location: widget.location, lat: widget.lat, lng: widget.lng),
+          ));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: _getContentWidget(_selectedIndex),
-      bottomNavigationBar: BottomNavigation(
-        selectedIndex: _selectedIndex,
-        onItemTapped: _onItemTapped,
-      ),
+      bottomNavigationBar: _selectedIndex == 1
+          ? BottomNavigation(
+              selectedIndex: _selectedIndex,
+              onItemTapped: _onItemTapped,
+            )
+          : null, // No se renderiza el BottomNavigation en otras pantallas.
     );
   }
 
   Widget _getContentWidget(int index) {
     switch (index) {
       case 0:
-        return const ChatbotScreen();
+        return ChatbotScreen(
+          location: widget.location,
+          lat: widget.lat,
+          lng: widget.lng,
+        );
       case 1:
         return _buildHomeContent();
       case 2:
-        return const Notifications();
+        return Notifications(
+          location: widget.location,
+          lat: widget.lat,
+          lng: widget.lng,
+        );
       default:
         return _buildHomeContent();
     }
@@ -225,7 +258,10 @@ class _HomeState extends State<Home> {
   Widget _buildHomeContent() {
     return Column(
       children: [
-        const TopSection(),
+        TopSection(
+            location: widget.location,
+            latitude: widget.lat,
+            longitude: widget.lng),
         Expanded(
           child: SingleChildScrollView(
             child: Padding(
@@ -319,6 +355,7 @@ class _HomeState extends State<Home> {
                             droughtDates: _droughtDates,
                             strongWindDates: _strongWindDates,
                             intenseRainDates: _intenseRainDates,
+                            location: widget.location,
                             latitude: widget.lat,
                             longitude: widget.lng,
                             onDaySelected: (selectedDay, focusedDay) {

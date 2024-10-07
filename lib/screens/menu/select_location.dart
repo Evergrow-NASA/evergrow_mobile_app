@@ -442,9 +442,9 @@ class _SelectLocationState extends State<SelectLocation> {
               Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
                 MaterialPageRoute(
                   builder: (context) => Home(
+                    _address ?? 'Unknown Location',
                     destLocation!.latitude,
                     destLocation!.longitude,
-                    _address ?? 'Unknown Location',
                   ),
                 ),
                 (route) => false,
