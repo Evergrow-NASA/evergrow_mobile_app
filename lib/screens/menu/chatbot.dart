@@ -19,7 +19,7 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   final ScrollController _scrollController = ScrollController();
   bool _isLoading = false;
   bool _isVoiceRecording = false;
-  bool _hasText = false; // Se actualiza a 'false' inicialmente
+  bool _hasText = false; // Initially set to 'false'
 
   final ChatbotService _chatbotService = ChatbotService();
 
@@ -28,11 +28,32 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
 
-    // Escuchar cambios en el controlador de texto para actualizar _hasText
+    // Listen to text controller changes to update _hasText
     _controller.addListener(() {
       setState(() {
         _hasText = _controller.text.isNotEmpty;
       });
+    });
+
+    // Simulating a conversation with hardcoded data
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _addMessageToList("Hello, how can I assist you today?");
+    });
+
+    Future.delayed(const Duration(seconds: 2), () {
+      _addMessageToList("What is the current condition of my field?");
+    });
+
+    Future.delayed(const Duration(seconds: 4), () {
+      _addMessageToList("Currently, the soil moisture level is 25%. I recommend monitoring it to decide when to irrigate.");
+    });
+
+    Future.delayed(const Duration(seconds: 6), () {
+      _addMessageToList("Thank you, what's the weather forecast for the next few days?");
+    });
+
+    Future.delayed(const Duration(seconds: 8), () {
+      _addMessageToList("Light rains are expected over the next three days with an average of 5mm of daily precipitation.");
     });
   }
 
@@ -109,34 +130,33 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
   }
 
   Future<void> _sendMessage(String message) async {
-  if (!mounted) return;
+    if (!mounted) return;
 
-  _addMessageToList(message);
+    _addMessageToList(message);
 
-  const String userId = '12345';
-  const String name = 'John Doe';
-  const String locationChoice = 'current';
-  const String city = 'New York';
-  const double lat = 40.7128;
-  const double lon = -74.0060;
+    const String userId = '12345';
+    const String name = 'John Doe';
+    const String locationChoice = 'current';
+    const String city = 'New York';
+    const double lat = 40.7128;
+    const double lon = -74.0060;
 
-  final response = await _chatbotService.sendChatbotRequest(
-    userId: userId,
-    question: message,
-    name: name,
-    locationChoice: locationChoice,
-    city: city,
-    lat: lat,
-    lon: lon,
-  );
+    final response = await _chatbotService.sendChatbotRequest(
+      userId: userId,
+      question: message,
+      name: name,
+      locationChoice: locationChoice,
+      city: city,
+      lat: lat,
+      lon: lon,
+    );
 
-  if (mounted) {
-    _addMessageToList(response);
+    if (mounted) {
+      _addMessageToList(response);
+    }
+
+    _controller.clear();
   }
-
-  _controller.clear();
-}
-
 
   void _addMessageToList(String message) {
     setState(() {
