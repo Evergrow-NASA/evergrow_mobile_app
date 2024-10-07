@@ -3,7 +3,15 @@ import 'package:evergrow_mobile_app/utils/theme.dart';
 import 'package:flutter/material.dart';
 
 class NotificationsSettingsPage extends StatefulWidget {
-  const NotificationsSettingsPage({super.key});
+  final String location;
+  final double lat;
+  final double lng;
+
+  const NotificationsSettingsPage(
+      {super.key,
+      required this.location,
+      required this.lat,
+      required this.lng});
 
   @override
   State<NotificationsSettingsPage> createState() =>
@@ -21,7 +29,11 @@ class _NotificationsSettingsPageState extends State<NotificationsSettingsPage> {
     return Scaffold(
       body: Column(
         children: [
-          const TopSection(),
+          TopSection(
+            location: widget.location,
+            latitude: widget.lat,
+            longitude: widget.lng,
+          ),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(

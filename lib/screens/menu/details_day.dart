@@ -1,5 +1,9 @@
+import 'package:evergrow_mobile_app/components/bottom_navigation.dart';
 import 'package:evergrow_mobile_app/constants.dart';
 import 'package:evergrow_mobile_app/models/recommendation.dart';
+import 'package:evergrow_mobile_app/screens/menu/chatbot.dart';
+import 'package:evergrow_mobile_app/screens/menu/home.dart';
+import 'package:evergrow_mobile_app/screens/menu/notifications.dart';
 import 'package:evergrow_mobile_app/utils/theme.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
@@ -12,6 +16,7 @@ class DetailsDay extends StatefulWidget {
   final List<DateTime> droughtDates;
   final List<DateTime> strongWindDates;
   final List<DateTime> intenseRainDates;
+  final String location;
   final double latitude;
   final double longitude;
 
@@ -22,6 +27,7 @@ class DetailsDay extends StatefulWidget {
     required this.droughtDates,
     required this.strongWindDates,
     required this.intenseRainDates,
+    required this.location,
     required this.latitude,
     required this.longitude,
   });
@@ -57,6 +63,42 @@ class _DetailsDayState extends State<DetailsDay> {
           'Secure crops. Do not spray pesticides as the wind will blow them away and waste them.',
     ),
   ];
+
+  int _selectedIndex = 1;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    if (index == 0) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ChatbotScreen(
+                location: widget.location,
+                lat: widget.latitude,
+                lng: widget.longitude)),
+      );
+    } else if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              Home(widget.location, widget.latitude, widget.longitude),
+        ),
+      );
+    } else if (index == 2) {
+      Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => Notifications(
+                location: widget.location,
+                lat: widget.latitude,
+                lng: widget.longitude),
+          ));
+    }
+  }
 
   late DateTime _focusedDay;
   late DateTime _selectedNewDay;
@@ -158,7 +200,11 @@ class _DetailsDayState extends State<DetailsDay> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          const TopSection(),
+          TopSection(
+            location: widget.location,
+            latitude: widget.latitude,
+            longitude: widget.longitude,
+          ),
           Expanded(
             child: SingleChildScrollView(
               child: Padding(
@@ -203,6 +249,10 @@ class _DetailsDayState extends State<DetailsDay> {
             ),
           ),
         ],
+      ),
+      bottomNavigationBar: BottomNavigation(
+        selectedIndex: _selectedIndex,
+        onItemTapped: _onItemTapped,
       ),
     );
   }
