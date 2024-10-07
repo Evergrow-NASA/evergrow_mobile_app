@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 import 'package:evergrow_mobile_app/models/autocomplete_prediction.dart';
 import 'package:evergrow_mobile_app/services/map_service.dart';
@@ -39,6 +37,7 @@ class _SelectLocationState extends State<SelectLocation> {
     super.initState();
     _initializeLocation();
     getCurrentLocation();
+    _setInitialAddress();
 
     _searchController.addListener(() {
       if (_searchController.text.isNotEmpty && !_updatingFromMap) {
@@ -57,6 +56,23 @@ class _SelectLocationState extends State<SelectLocation> {
       }
       placeAutoComplete(_searchController.text);
     });
+  }
+
+  Future<void> _setInitialAddress() async {
+    try {
+      GeoData data = await Geocoder2.getDataFromCoordinates(
+        latitude: destLocation!.latitude,
+        longitude: destLocation!.longitude,
+        googleMapApiKey: apiKey,
+      );
+
+      setState(() {
+        _searchController.text = formatAddress(data.address);
+        _showLocationPredictions = false;
+      });
+    } catch (e) {
+      print('Error al obtener la dirección inicial: $e');
+    }
   }
 
   Future<void> _initializeLocation() async {
@@ -114,13 +130,16 @@ class _SelectLocationState extends State<SelectLocation> {
 
       var location = result['result']['geometry']['location'];
       LatLng newLocation = LatLng(location['lat'], location['lng']);
-      String formattedAddress = result['result']['formatted_address'];
+
+      String detailedAddress = result['result']['address_components']
+          .map((component) => component['long_name'])
+          .join(', ');
 
       setState(() {
-        _searchController.text = formattedAddress;
+        _searchController.text = detailedAddress;
         predictions.clear();
         _showLocationPredictions = false;
-        _address = formatAddress(formattedAddress);
+        _address = detailedAddress;
       });
 
       final GoogleMapController? controller = await _controller.future;
@@ -226,7 +245,7 @@ class _SelectLocationState extends State<SelectLocation> {
             setState(() {
               _updatingFromMap = true;
               destLocation = position.target;
-              _searchController.text = _address ?? 'Select your location';
+              _searchController.text = _address ?? '';
             });
           }
         },
@@ -301,7 +320,7 @@ class _SelectLocationState extends State<SelectLocation> {
 
   Widget _buildContainerSelectLocation() {
     double keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
-    double containerHeight = _showLocationPredictions ? 740 : 250;
+    double containerHeight = _showLocationPredictions ? 740 : 280;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 0),
@@ -376,22 +395,6 @@ class _SelectLocationState extends State<SelectLocation> {
           }
         },
         controller: _searchController,
-        onFieldSubmitted: (value) async {
-          if (predictions.isNotEmpty) {
-            String placeId = predictions.first.placeId!;
-            await _selectLocation(placeId);
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => Home(
-                  destLocation!.latitude,
-                  destLocation!.longitude,
-                  _address ?? 'Unknown Location',
-                ),
-              ),
-              (route) => false,
-            );
-          }
-        },
         decoration: InputDecoration(
           filled: true,
           fillColor: secondary3,
@@ -399,7 +402,19 @@ class _SelectLocationState extends State<SelectLocation> {
             borderRadius: BorderRadius.circular(10),
             borderSide: BorderSide.none,
           ),
-          suffixIcon: const Icon(Icons.search),
+          suffixIcon: IconButton(
+            icon: const Icon(Icons.search),
+            onPressed: () async {
+              placeAutoComplete(_searchController.text);
+              // Si hay resultados, selecciona el primero
+              if (predictions.isNotEmpty) {
+                await _selectLocation(predictions.first.placeId!);
+                setState(() {
+                  _showLocationPredictions = false;
+                });
+              }
+            },
+          ),
         ),
       ),
     );
@@ -423,16 +438,18 @@ class _SelectLocationState extends State<SelectLocation> {
         ),
         child: ElevatedButton(
           onPressed: () {
-            Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(
-                builder: (context) => Home(
-                  destLocation!.latitude,
-                  destLocation!.longitude,
-                  _address ?? 'Unknown Location',
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => Home(
+                    destLocation!.latitude,
+                    destLocation!.longitude,
+                    _address ?? 'Unknown Location',
+                  ),
                 ),
-              ),
-              (route) => false,
-            );
+                (route) => false,
+              );
+            });
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.transparent,
