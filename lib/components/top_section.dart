@@ -1,11 +1,18 @@
+import 'package:evergrow_mobile_app/screens/settings/settings.dart';
 import 'package:flutter/material.dart';
 import '../utils/theme.dart';
 
 class TopSection extends StatelessWidget {
-  const TopSection({super.key});
+  final String? location;
+  final double? latitude;
+  final double? longitude;
+
+  const TopSection({super.key, this.location, this.latitude, this.longitude});
 
   @override
   Widget build(BuildContext context) {
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+
     return Stack(
       children: [
         ClipPath(
@@ -41,15 +48,30 @@ class TopSection extends StatelessWidget {
             ],
           ),
         ),
-        const Positioned(
-          top: 50,
-          right: 20,
-          child: Icon(
-            Icons.settings,
-            color: AppTheme.primaryColor,
-            size: 30,
+        if (currentRoute != '/settings')
+          Positioned(
+            top: 50,
+            right: 20,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SettingsPage(
+                      location: location!,
+                      lat: latitude!,
+                      lng: longitude!,
+                    ),
+                  ),
+                );
+              },
+              child: const Icon(
+                Icons.settings,
+                color: AppTheme.primaryColor,
+                size: 30,
+              ),
+            ),
           ),
-        ),
       ],
     );
   }
